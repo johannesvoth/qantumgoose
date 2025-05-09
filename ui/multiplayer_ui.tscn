@@ -86,9 +86,9 @@ text = "Steam Area: (click lobby to join)"
 [node name="ScrollContainer" type="ScrollContainer" parent="SteamStuff"]
 custom_minimum_size = Vector2(400, 200)
 layout_mode = 2
-offset_left = 194.0
+offset_left = 220.0
 offset_top = 149.008
-offset_right = 594.0
+offset_right = 620.0
 offset_bottom = 349.008
 
 [node name="LobbyList" type="VBoxContainer" parent="SteamStuff/ScrollContainer"]

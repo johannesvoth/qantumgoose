@@ -90,5 +90,5 @@ shape = SubResource("CircleShape2D_yw30f")
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_g1dw6")
 
-[node name="MultiplayerSpawnerClientAuth" type="MultiplayerSpawner" parent="."]
+[node name="ProjectileSpawnerClientAuth" type="MultiplayerSpawner" parent="."]
 spawn_path = NodePath("..")

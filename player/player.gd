@@ -7,16 +7,16 @@ var jump_intent := false
 
 @export var bucket: PackedScene
 
-func spawnBucket(data):
+@onready var projectile_spawner_client_auth: MultiplayerSpawner = $ProjectileSpawnerClientAuth
+
+func spawnProjectile(data):
 	var b:Node2D = bucket.instantiate()
 	var auth = get_multiplayer_authority()
 	b.set_multiplayer_authority(auth)
 	return b
 
-
-@onready var multiplayer_spawner_client_auth: MultiplayerSpawner = $MultiplayerSpawnerClientAuth
 func _ready() -> void:
-	multiplayer_spawner_client_auth.spawn_function = spawnBucket
+	projectile_spawner_client_auth.spawn_function = spawnProjectile
 
 
 func _enter_tree() -> void:
@@ -38,23 +38,4 @@ func _physics_process(delta):
 func do_jump():
 	jump_intent = false
 	print("jumped")
-	# spawn_random_sprite()
-	multiplayer_spawner_client_auth.spawn(bucket)
-
-
-func spawn_random_sprite():
-	print("spawned random sprite")
-	var rand_color = get_random_color()
-	var bucket_instance = bucket.instantiate()
-	
-	var auth = get_multiplayer_authority()
-	bucket_instance.set_multiplayer_authority(auth)
-	
-	add_child(bucket_instance, true)
-	bucket_instance.modulate = rand_color
-
-func get_random_color() -> Color:
-	var r = randf()
-	var g = randf()
-	var b = randf()
-	return Color(r, g, b)
+	projectile_spawner_client_auth.spawn(bucket)

@@ -25,6 +25,10 @@ func _ready():
 func _on_steam_join(lobby_id:int):
 	steam_peer.connect_lobby(lobby_id)
 	multiplayer.multiplayer_peer = steam_peer
+	
+	add_player(multiplayer.get_unique_id())
+	print(str(multiplayer.get_unique_id()) + "has joined the Steam game")
+	
 	multiplayer_ui.hide()
 
 
@@ -71,7 +75,7 @@ func _on_host_steam_pressed() -> void:
 	multiplayer_ui.hide()
 	
 	world_spawner.spawn_world()
-
+	add_player(multiplayer.get_unique_id()) # always host but whatever
 
 
 func _on_host_lan_pressed() -> void:
@@ -81,14 +85,13 @@ func _on_host_lan_pressed() -> void:
 	
 	multiplayer.peer_connected.connect(
 		func(p_id):
-			print(str(p_id) + "has joined the game")
+			print(str(p_id) + "has joined the LAN game")
 			add_player(p_id)
 	)
 	
 	add_player(multiplayer.get_unique_id()) # host player
 	
-	# only spawn the world if you are a host
-	world_spawner.spawn_world()
+	world_spawner.spawn_world() # only spawn the world if you are a host
 	
 	multiplayer_ui.hide()
 
