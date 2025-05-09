@@ -25,7 +25,3 @@ text = "WORLD"
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_tcf2h")
-
-[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("uid://dhlva6g4n8q5t")
-spawn_path = NodePath("..")

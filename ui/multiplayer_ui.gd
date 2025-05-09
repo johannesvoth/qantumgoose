@@ -8,7 +8,7 @@ extends Control
 
 const PLAYER = preload("res://player/player.tscn")
 
-@onready var player_spawner: Node = $"../PlayerSpawner"
+@onready var player_spawner: MultiplayerSpawner = $"../PlayerSpawner"
 
 
 var lobby_id: int = 0
@@ -26,8 +26,7 @@ func _on_steam_join(lobby_id:int):
 	steam_peer.connect_lobby(lobby_id)
 	multiplayer.multiplayer_peer = steam_peer
 	
-	add_player(multiplayer.get_unique_id())
-	print(str(multiplayer.get_unique_id()) + "has joined the Steam game")
+	# no adding of player here, but when?
 	
 	multiplayer_ui.hide()
 
@@ -74,6 +73,13 @@ func _on_host_steam_pressed() -> void:
 	multiplayer.multiplayer_peer = steam_peer
 	multiplayer_ui.hide()
 	
+	
+	multiplayer.peer_connected.connect(
+		func(p_id):
+			print(str(p_id) + "has joined the LAN game")
+			add_player(p_id)
+	)
+	
 	world_spawner.spawn_world()
 	add_player(multiplayer.get_unique_id()) # always host but whatever
 
@@ -106,4 +112,5 @@ func _on_join_lan_pressed() -> void:
 func add_player(p_id):
 	var player = PLAYER.instantiate()
 	player.name = str(p_id)
-	player_spawner.add_child(player, true)
+	player_spawner.add_child(player, true) # this doesn't seem to be robust enough for steam, it's not really using the MultiplayerSpawner to spawn and the list of what needs to catch up is not correct
+# but if you take out the auto spawn list, it sucks. because LAN breaks
