@@ -1,7 +1,8 @@
-[gd_scene load_steps=14 format=3 uid="uid://bbrh0u7rgtlo3"]
+[gd_scene load_steps=15 format=3 uid="uid://bbrh0u7rgtlo3"]
 
 [ext_resource type="Texture2D" uid="uid://b4j2ae7llyadg" path="res://player/Bat-all-animations-96x96-each row is a different animation-from top to bottom-Idle-walk-walk to atk transition-atk instance-atk-hurt-death.png" id="1_oul6g"]
 [ext_resource type="Script" uid="uid://dd43nyxjr0nrh" path="res://player/player.gd" id="1_rkbax"]
+[ext_resource type="PackedScene" uid="uid://dhlva6g4n8q5t" path="res://bucket.tscn" id="2_g1dw6"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_rkbax"]
 atlas = ExtResource("1_oul6g")
@@ -77,6 +78,7 @@ properties/0/replication_mode = 1
 
 [node name="Player" type="CharacterBody2D"]
 script = ExtResource("1_rkbax")
+bucket = ExtResource("2_g1dw6")
 
 [node name="BatSprite" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_8t03j")
@@ -89,5 +91,4 @@ shape = SubResource("CircleShape2D_yw30f")
 replication_config = SubResource("SceneReplicationConfig_g1dw6")
 
 [node name="MultiplayerSpawnerClientAuth" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("uid://dhlva6g4n8q5t")
 spawn_path = NodePath("..")
