@@ -103,5 +103,4 @@ func _on_join_lan_pressed() -> void:
 func add_player(p_id):
 	var player = PLAYER.instantiate()
 	player.name = str(p_id)
-	player.player = p_id
 	player_spawner.add_child(player, true)
