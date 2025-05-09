@@ -22,11 +22,9 @@ func _ready():
 
 
 
-func _on_steam_join(lobby_id:int):
+func _on_steam_join(lobby_id:int): # no adding of player here, but when? = when the host is created, he setupts the signal for when other peers join.
 	steam_peer.connect_lobby(lobby_id)
 	multiplayer.multiplayer_peer = steam_peer
-	
-	# no adding of player here, but when?
 	
 	multiplayer_ui.hide()
 
@@ -37,7 +35,6 @@ func _on_lobby_created(connect: int, this_lobby_id: int) -> void:
 		Steam.setLobbyData(lobby_id, "name", str(Steam.getPersonaName()+"'s Lobby"))
 		Steam.setLobbyJoinable(lobby_id, true)
 		print("Created lobby: ",str(Steam.getPersonaName()+"'s Lobby"))
-
 
 func _on_lobby_match_list(these_lobbies: Array) -> void:
 	
@@ -59,8 +56,6 @@ func _on_lobby_match_list(these_lobbies: Array) -> void:
 
 		lobby_list.add_child(lobby_button)
 
-
-
 func _on_refresh_lobbies_button_pressed() -> void:
 	Steam.addRequestLobbyListDistanceFilter(Steam.LOBBY_DISTANCE_FILTER_WORLDWIDE)
 	print("305 Mr. Worldwide Requesting a lobby list")
@@ -72,7 +67,6 @@ func _on_host_steam_pressed() -> void:
 	steam_peer.create_lobby(SteamMultiplayerPeer.LOBBY_TYPE_PUBLIC)
 	multiplayer.multiplayer_peer = steam_peer
 	multiplayer_ui.hide()
-	
 	
 	multiplayer.peer_connected.connect(
 		func(p_id):
@@ -109,8 +103,7 @@ func _on_join_lan_pressed() -> void:
 	
 	multiplayer_ui.hide()
 
-func add_player(p_id):
+func add_player(p_id): # just done it here instead of giving the player spawner a dedicated script. Might move this in the future.
 	var player = PLAYER.instantiate()
 	player.name = str(p_id)
-	player_spawner.add_child(player, true) # this doesn't seem to be robust enough for steam, it's not really using the MultiplayerSpawner to spawn and the list of what needs to catch up is not correct
-# but if you take out the auto spawn list, it sucks. because LAN breaks
+	player_spawner.add_child(player, true)
