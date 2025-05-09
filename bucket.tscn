@@ -1,8 +1,21 @@
-[gd_scene load_steps=2 format=3 uid="uid://dhlva6g4n8q5t"]
+[gd_scene load_steps=4 format=3 uid="uid://dhlva6g4n8q5t"]
 
 [ext_resource type="Texture2D" uid="uid://bw7v4v20g3ml5" path="res://icon.svg" id="1_bgj3b"]
+[ext_resource type="Script" uid="uid://db2euinpfxwo2" path="res://bucket.gd" id="1_caem6"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_bgj3b"]
+properties/0/path = NodePath(".:modulate")
+properties/0/spawn = true
+properties/0/replication_mode = 1
 
 [node name="Bucket" type="Node2D"]
+script = ExtResource("1_caem6")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_bgj3b")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_bgj3b")
+
+[node name="Timer" type="Timer" parent="."]
+autostart = true
