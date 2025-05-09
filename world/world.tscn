@@ -1,0 +1,31 @@
+[gd_scene load_steps=4 format=3 uid="uid://b27by4d24t3vc"]
+
+[ext_resource type="Texture2D" uid="uid://bw7v4v20g3ml5" path="res://icon.svg" id="1_6xmxd"]
+[ext_resource type="Script" uid="uid://b5xdbj8s87rrw" path="res://world/world.gd" id="1_tcf2h"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_tcf2h"]
+properties/0/path = NodePath("Sprite2D:modulate")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+
+[node name="World" type="Node2D"]
+script = ExtResource("1_tcf2h")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(512, 251)
+scale = Vector2(1.40625, 1.26562)
+texture = ExtResource("1_6xmxd")
+
+[node name="Label" type="Label" parent="."]
+offset_left = 438.0
+offset_top = 113.0
+offset_right = 577.0
+offset_bottom = 154.0
+text = "WORLD"
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_tcf2h")
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("uid://dhlva6g4n8q5t")
+spawn_path = NodePath("..")
