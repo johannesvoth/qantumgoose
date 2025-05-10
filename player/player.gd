@@ -7,7 +7,7 @@ var jump_intent := false
 
 @export var bucket: PackedScene
 
-@onready var util_spawner: MultiplayerSpawner = $UtilSpawnerClientAuth
+# @onready var util_spawner: MultiplayerSpawner = $UtilSpawnerClientAuth
 
 func spawnProjectile(data):
 	var b:Node2D = bucket.instantiate()
@@ -16,7 +16,8 @@ func spawnProjectile(data):
 	return b
 
 func _ready() -> void:
-	util_spawner.spawn_function = spawnProjectile
+	#util_spawner.spawn_function = spawnProjectile
+	pass
 
 func _enter_tree() -> void:
 	set_multiplayer_authority(int(str(name)))
@@ -32,9 +33,18 @@ func _physics_process(delta):
 	move_and_slide()
 	
 	if jump_intent:
-		do_jump()
+		do_jump.rpc()
 
+@rpc("call_local")
 func do_jump():
 	jump_intent = false
 	print("jumped")
-	util_spawner.spawn(bucket)
+	spawnBucket()
+	#util_spawner.spawn(bucket) # this also doesn't work with more paramters???
+
+
+func spawnBucket():
+	var b:Node2D = bucket.instantiate()
+	var auth = get_multiplayer_authority()
+	b.set_multiplayer_authority(auth)
+	add_child(b, true)
