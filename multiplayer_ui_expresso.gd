@@ -49,8 +49,30 @@ func _ready() -> void:
 	Steam.lobby_match_list.connect(_on_lobby_match_list)
 	Steam.lobby_joined.connect(_on_lobby_joined)
 	
+	# Connect multiplayer signals for debugging
+	multiplayer.peer_connected.connect(_on_peer_connected)
+	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
+	multiplayer.connected_to_server.connect(_on_connected_to_server)
+	multiplayer.connection_failed.connect(_on_connection_failed)
+	multiplayer.server_disconnected.connect(_on_server_disconnected)
+	
 	# Initial lobby refresh
 	_on_refresh_lobbies_button_pressed()
+
+func _on_peer_connected(id: int) -> void:
+	print("Peer connected: ", id)
+
+func _on_peer_disconnected(id: int) -> void:
+	print("Peer disconnected: ", id)
+
+func _on_connected_to_server() -> void:
+	print("Successfully connected to server!")
+
+func _on_connection_failed() -> void:
+	print("Connection to server failed!")
+
+func _on_server_disconnected() -> void:
+	print("Server disconnected!")
 
 func _process(_delta):
 	Steam.run_callbacks()
@@ -171,6 +193,8 @@ func _on_steam_join(lobby_to_join_id: int) -> void:
 	Steam.joinLobby(lobby_to_join_id)
 
 func _on_lobby_created(result: int, this_lobby_id: int) -> void:
+	print("_on_lobby_created called - Result: %s, Lobby ID: %s" % [result, this_lobby_id])
+	
 	if result != Steam.Result.RESULT_OK:
 		print("Failed to create Steam lobby. Result: ", result)
 		return
@@ -179,10 +203,16 @@ func _on_lobby_created(result: int, this_lobby_id: int) -> void:
 	Steam.setLobbyData(lobby_id, "name", str(Steam.getPersonaName() + "'s Lobby"))
 	Steam.setLobbyJoinable(lobby_id, true)
 	print("Created lobby (Expressobits): ", str(Steam.getPersonaName() + "'s Lobby"))
+	print("Lobby ID: %s" % lobby_id)
 	
 	# EXPRESSOBITS: Use create_host instead of host_with_lobby
-	steam_peer.create_host(0) # 0 is the virtual channel
+	var error = steam_peer.create_host(0) # 0 is the virtual channel
+	if error != OK:
+		print("Failed to create host. Error: ", error)
+		return
+		
 	multiplayer.multiplayer_peer = steam_peer
+	print("Multiplayer peer set as host, unique ID: ", multiplayer.get_unique_id())
 		
 	# Listen for new players connecting
 	multiplayer.peer_connected.connect(add_player)
@@ -190,7 +220,9 @@ func _on_lobby_created(result: int, this_lobby_id: int) -> void:
 	_start_game_session()
 
 func _on_lobby_joined(joined_lobby_id: int, _permissions: int, _locked: bool, response: int) -> void:
-	# Check for successful join
+	print("_on_lobby_joined called - Lobby: %s, Response: %s" % [joined_lobby_id, response])
+	
+	# Check for successful join (response 1 = success)
 	if response != 1:
 		var fail_reason: String
 		match response:
@@ -207,16 +239,26 @@ func _on_lobby_joined(joined_lobby_id: int, _permissions: int, _locked: bool, re
 		print("Failed to join lobby: ", fail_reason)
 		return
 	
-	# The host also receives this signal, so we ignore it if we are the owner.
+	# The host also receives this signal when they create the lobby
+	# We need to skip the connection setup for the host
 	var owner_id = Steam.getLobbyOwner(joined_lobby_id)
+	print("Lobby owner: %s, My Steam ID: %s" % [owner_id, Steam.getSteamID()])
+	
 	if owner_id == Steam.getSteamID():
+		print("I am the lobby owner, skipping client connection")
 		return
 	
-	print("Successfully joined lobby (Expressobits): ", joined_lobby_id)
+	print("Successfully joined lobby as client (Expressobits): ", joined_lobby_id)
+	print("Connecting to host Steam ID: ", owner_id)
 	
 	# EXPRESSOBITS: Use create_client with the host's Steam ID
-	steam_peer.create_client(owner_id, 0) # 0 is the virtual channel
+	var error = steam_peer.create_client(owner_id, 0) # 0 is the virtual channel
+	if error != OK:
+		print("Failed to create client connection. Error: ", error)
+		return
+		
 	multiplayer.multiplayer_peer = steam_peer
+	print("Multiplayer peer set, starting game session")
 	_start_game_session()
 
 func _on_lobby_match_list(these_lobbies: Array) -> void:
