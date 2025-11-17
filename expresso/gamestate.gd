@@ -93,12 +93,11 @@ func load_world():
 	# Change scene.
 	var world = load("res://world/world.tscn").instantiate()
 	get_tree().get_root().add_child(world)
-	get_tree().get_root().get_node("Lobby").hide()
 
 	# Set up score.
-	world.get_node("Score").add_player(multiplayer.get_unique_id(), player_name)
-	for pn in players:
-		world.get_node("Score").add_player(pn, players[pn])
+	#world.get_node("Score").add_player(multiplayer.get_unique_id(), player_name)
+	#for pn in players:
+		#world.get_node("Score").add_player(pn, players[pn])
 	get_tree().set_pause(false) # Unpause and unleash the game!
 
 
@@ -130,7 +129,7 @@ func begin_game():
 	load_world.rpc()
 
 	var world = get_tree().get_root().get_node("World")
-	var player_scene = load("res://player.tscn")
+	var player_scene = load("res://player/player.tscn")
 
 	# Create a dictionary with peer id and respective spawn points, could be improved by randomizing.
 	var spawn_points = {}
@@ -141,11 +140,11 @@ func begin_game():
 		spawn_point_idx += 1
 
 	for p_id in spawn_points:
-		var spawn_pos = world.get_node("SpawnPoints/" + str(spawn_points[p_id])).position
+		var spawn_pos = Vector2i.ZERO
 		var player = player_scene.instantiate()
-		player.synced_position = spawn_pos
+		#player.synced_position = spawn_pos
 		player.name = str(p_id)
-		player.set_player_name(player_name if p_id == multiplayer.get_unique_id() else players[p_id])
+		#player.set_player_name(player_name if p_id == multiplayer.get_unique_id() else players[p_id])
 		world.get_node("Players").add_child(player)
 
 
