@@ -1,6 +1,3 @@
-# Attach this script to a single root Control node.
-# It will build its own UI.
-# EXPRESSOBITS VERSION
 extends Control
 
 # --- Constants and Preloads ---
@@ -8,11 +5,11 @@ const PLAYER = preload("res://player/player.tscn")
 const DEFAULT_PORT = 7777
 const DEFAULT_IP = "127.0.0.1"
 
-# --- Scene References (use get_node for robustness) ---
+# --- Scene References ---
 @onready var player_spawner: MultiplayerSpawner = get_node_or_null("../PlayerSpawner")
 @onready var world_spawner: MultiplayerSpawner = get_node_or_null("../WorldSpawner")
 
-# --- UI Node References (will be created in _ready) ---
+# --- UI Node References ---
 var lobby_list: VBoxContainer
 var lan_ip_input: LineEdit
 var lan_port_input: LineEdit
@@ -28,76 +25,48 @@ var lobby_id: int = 0
 # ==============================================================================
 
 func _ready() -> void:
-	# Check for required spawner nodes
 	if not player_spawner or not world_spawner:
 		push_error("PlayerSpawner or WorldSpawner not found. This script requires them as siblings.")
 		set_process(false)
 		return
 	
-	# Initialize Steam
 	var init_result = Steam.steamInitEx(true, 480)
-	print("Steam initialization (Expressobits): ", init_result)
-	
-	# Initialize relay network for P2P
+	print("Steam initialization: ", init_result)
 	Steam.initRelayNetworkAccess()
 	
-	# Build the entire UI programmatically
 	_build_ui()
 	
-	# Connect Steam signals
 	Steam.lobby_created.connect(_on_lobby_created)
 	Steam.lobby_match_list.connect(_on_lobby_match_list)
 	Steam.lobby_joined.connect(_on_lobby_joined)
 	
-	# Connect multiplayer signals for debugging
 	multiplayer.peer_connected.connect(_on_peer_connected)
 	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	multiplayer.connected_to_server.connect(_on_connected_to_server)
 	multiplayer.connection_failed.connect(_on_connection_failed)
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
 	
-	# Initial lobby refresh
 	_on_refresh_lobbies_button_pressed()
-
-func _on_peer_connected(id: int) -> void:
-	print("Peer connected: ", id)
-
-func _on_peer_disconnected(id: int) -> void:
-	print("Peer disconnected: ", id)
-
-func _on_connected_to_server() -> void:
-	print("Successfully connected to server!")
-	# Client is now connected - add their player
-	add_player(multiplayer.get_unique_id())
-
-func _on_connection_failed() -> void:
-	print("Connection to server failed!")
-
-func _on_server_disconnected() -> void:
-	print("Server disconnected!")
 
 func _process(_delta):
 	Steam.run_callbacks()
 
 func _build_ui() -> void:
-	# Use an anchor preset to center the content
 	self.anchor_right = 1.0
 	self.anchor_bottom = 1.0
 	
-	# Main container to center everything
 	var main_vbox = VBoxContainer.new()
 	main_vbox.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	add_child(main_vbox)
 
-	# Title label
 	var title_label = Label.new()
-	title_label.text = "EXPRESSOBITS MULTIPLAYER"
+	title_label.text = "MULTIPLAYER LOBBY"
 	title_label.add_theme_font_size_override("font_size", 20)
 	main_vbox.add_child(title_label)
 	
 	main_vbox.add_child(HSeparator.new())
 
-	# --- Steam UI Section ---
+	# Steam UI
 	var steam_label = Label.new()
 	steam_label.text = "Steam Multiplayer"
 	main_vbox.add_child(steam_label)
@@ -115,7 +84,6 @@ func _build_ui() -> void:
 	refresh_lobbies_button.pressed.connect(_on_refresh_lobbies_button_pressed)
 	steam_hbox.add_child(refresh_lobbies_button)
 
-	# Lobby List Area
 	var scroll_container = ScrollContainer.new()
 	scroll_container.custom_minimum_size = Vector2(400, 200)
 	main_vbox.add_child(scroll_container)
@@ -124,7 +92,7 @@ func _build_ui() -> void:
 	lobby_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll_container.add_child(lobby_list)
 
-	# --- LAN UI Section ---
+	# LAN UI
 	main_vbox.add_child(HSeparator.new())
 	
 	var lan_label = Label.new()
@@ -135,7 +103,7 @@ func _build_ui() -> void:
 	main_vbox.add_child(lan_inputs_hbox)
 
 	var ip_label = Label.new()
-	ip_label.text = "IP Address:"
+	ip_label.text = "IP:"
 	lan_inputs_hbox.add_child(ip_label)
 	
 	lan_ip_input = LineEdit.new()
@@ -149,7 +117,6 @@ func _build_ui() -> void:
 	
 	lan_port_input = LineEdit.new()
 	lan_port_input.text = str(DEFAULT_PORT)
-	lan_port_input.placeholder_text = str(DEFAULT_PORT)
 	lan_inputs_hbox.add_child(lan_port_input)
 	
 	var lan_actions_hbox = HBoxContainer.new()
@@ -166,160 +133,180 @@ func _build_ui() -> void:
 	lan_actions_hbox.add_child(join_lan_button)
 
 # ==============================================================================
-# Signal Callbacks & Logic
+# Game Start Orchestration (EXPRESSOBITS PATTERN)
 # ==============================================================================
 
 func _start_game_session() -> void:
-	# Once connected as host or client, spawn the world (if host)
-	# and remove the UI.
+	# HOST: Spawn world and trigger player spawning on all peers
 	if multiplayer.is_server():
 		world_spawner.spawn_world()
-		# Add the host player
-		add_player(multiplayer.get_unique_id())
+		print("Host starting game, spawning players for all peers...")
+		spawn_player_for.rpc()
+	else:
+		# CLIENT: Will spawn via RPC from host
+		print("Client waiting for spawn signal...")
 
-	# Remove the menu from the scene tree as it's no longer needed
+func _exit_tree() -> void:
+	# Clean up UI removal
 	self.queue_free()
 
-# --- Steam Callbacks ---
+# This is the KEY RPC that runs on ALL peers when host starts game
+@rpc("authority", "call_local", "reliable")
+func spawn_player_for() -> void:
+	var my_id = multiplayer.get_unique_id()
+	print("Spawning player for ID: ", my_id)
+	add_player(my_id)
+
+# ==============================================================================
+# Steam Callbacks
+# ==============================================================================
 
 func _on_host_steam_pressed() -> void:
-	# Create lobby using Steam's createLobby
-	Steam.createLobby(Steam.LOBBY_TYPE_PUBLIC, 16) # 16 max players
+	Steam.createLobby(Steam.LOBBY_TYPE_PUBLIC, 16)
 
 func _on_refresh_lobbies_button_pressed() -> void:
 	Steam.addRequestLobbyListDistanceFilter(Steam.LOBBY_DISTANCE_FILTER_WORLDWIDE)
-	print("Requesting Steam lobby list...")
 	Steam.requestLobbyList()
 
 func _on_steam_join(lobby_to_join_id: int) -> void:
 	Steam.joinLobby(lobby_to_join_id)
 
 func _on_lobby_created(result: int, this_lobby_id: int) -> void:
-	print("_on_lobby_created called - Result: %s, Lobby ID: %s" % [result, this_lobby_id])
-	
 	if result != Steam.Result.RESULT_OK:
-		print("Failed to create Steam lobby. Result: ", result)
+		print("Failed to create Steam lobby: ", result)
 		return
 		
 	lobby_id = this_lobby_id
 	Steam.setLobbyData(lobby_id, "name", str(Steam.getPersonaName() + "'s Lobby"))
 	Steam.setLobbyJoinable(lobby_id, true)
-	print("Created lobby (Expressobits): ", str(Steam.getPersonaName() + "'s Lobby"))
-	print("Lobby ID: %s" % lobby_id)
+	print("Created lobby: ", lobby_id)
 	
-	# EXPRESSOBITS: Use create_host instead of host_with_lobby
-	var error = steam_peer.create_host(0) # 0 is the virtual channel
+	var error = steam_peer.create_host(0)
 	if error != OK:
-		print("Failed to create host. Error: ", error)
+		print("Failed to create host: ", error)
 		return
 		
 	multiplayer.multiplayer_peer = steam_peer
-	print("Multiplayer peer set as host, unique ID: ", multiplayer.get_unique_id())
+	print("Host peer set, ID: ", multiplayer.get_unique_id())
 		
-	# Listen for new players connecting - this fires when clients join
-	multiplayer.peer_connected.connect(_on_player_joined)
-	
 	_start_game_session()
-
-func _on_player_joined(id: int) -> void:
-	print("New player joined with ID: ", id)
-	# This is called on the SERVER when a new client connects
-	# Spawn the player for the newly connected client
-	add_player(id)
+	self.queue_free()
 
 func _on_lobby_joined(joined_lobby_id: int, _permissions: int, _locked: bool, response: int) -> void:
-	print("_on_lobby_joined called - Lobby: %s, Response: %s" % [joined_lobby_id, response])
-	
-	# Check for successful join (response 1 = success)
 	if response != 1:
 		var fail_reason: String
 		match response:
-			2: fail_reason = "This lobby no longer exists."
-			3: fail_reason = "You don't have permission to join this lobby."
-			4: fail_reason = "The lobby is now full."
-			5: fail_reason = "Uh... something unexpected happened!"
-			6: fail_reason = "You are banned from this lobby."
-			7: fail_reason = "You cannot join due to having a limited account."
-			8: fail_reason = "This lobby is locked or disabled."
-			9: fail_reason = "This lobby is community locked."
-			10: fail_reason = "A user in the lobby has blocked you from joining."
-			11: fail_reason = "A user you have blocked is in the lobby."
-		print("Failed to join lobby: ", fail_reason)
+			2: fail_reason = "Lobby no longer exists."
+			3: fail_reason = "No permission."
+			4: fail_reason = "Lobby full."
+			5: fail_reason = "Unexpected error."
+			6: fail_reason = "Banned."
+			7: fail_reason = "Limited account."
+			8: fail_reason = "Lobby locked."
+			9: fail_reason = "Community locked."
+			10: fail_reason = "Blocked by user."
+			11: fail_reason = "You blocked a user."
+		print("Failed to join: ", fail_reason)
 		return
 	
-	# The host also receives this signal when they create the lobby
-	# We need to skip the connection setup for the host
 	var owner_id = Steam.getLobbyOwner(joined_lobby_id)
-	print("Lobby owner: %s, My Steam ID: %s" % [owner_id, Steam.getSteamID()])
+	print("Lobby owner: ", owner_id, " My ID: ", Steam.getSteamID())
 	
 	if owner_id == Steam.getSteamID():
-		print("I am the lobby owner, skipping client connection")
+		print("I am the host, skipping client setup")
 		return
 	
-	print("Successfully joined lobby as client (Expressobits): ", joined_lobby_id)
-	print("Connecting to host Steam ID: ", owner_id)
+	print("Joining as client to: ", owner_id)
 	
-	# EXPRESSOBITS: Use create_client with the host's Steam ID
-	var error = steam_peer.create_client(owner_id, 0) # 0 is the virtual channel
+	var error = steam_peer.create_client(owner_id, 0)
 	if error != OK:
-		print("Failed to create client connection. Error: ", error)
+		print("Failed to create client: ", error)
 		return
 		
 	multiplayer.multiplayer_peer = steam_peer
-	print("Multiplayer peer set, starting game session")
-	_start_game_session()
+	# Client will spawn when connected_to_server fires
 
 func _on_lobby_match_list(these_lobbies: Array) -> void:
-	# Clear existing lobby buttons
 	for child in lobby_list.get_children():
 		child.queue_free()
 	
-	print("Found %d lobbies." % these_lobbies.size())
+	print("Found %d lobbies" % these_lobbies.size())
 	
-	# Create a button for each lobby found
 	for this_lobby in these_lobbies:
 		var lobby_name: String = Steam.getLobbyData(this_lobby, "name")
-		var lobby_num_members: int = Steam.getNumLobbyMembers(this_lobby)
+		var members: int = Steam.getNumLobbyMembers(this_lobby)
 		
-		var lobby_button := Button.new()
-		lobby_button.text = "'%s' - (%s/%s)" % [lobby_name, lobby_num_members, Steam.getLobbyMemberLimit(this_lobby)]
-		lobby_button.pressed.connect(_on_steam_join.bind(this_lobby))
-		lobby_list.add_child(lobby_button)
+		var button := Button.new()
+		button.text = "%s (%d/%d)" % [lobby_name, members, Steam.getLobbyMemberLimit(this_lobby)]
+		button.pressed.connect(_on_steam_join.bind(this_lobby))
+		lobby_list.add_child(button)
 
-# --- LAN Callbacks ---
+# ==============================================================================
+# LAN Callbacks
+# ==============================================================================
 
 func _on_host_lan_pressed() -> void:
 	var port = int(lan_port_input.text) if lan_port_input.text.is_valid_int() else DEFAULT_PORT
 	var error = lan_peer.create_server(port)
 	if error != OK:
-		print("Failed to create LAN server. Error: ", error)
+		print("Failed to create LAN server: ", error)
 		return
 		
 	multiplayer.multiplayer_peer = lan_peer
-	multiplayer.peer_connected.connect(add_player)
-	
-	print("LAN Server started on port ", port)
+	print("LAN server on port ", port)
 	_start_game_session()
+	self.queue_free()
 
 func _on_join_lan_pressed() -> void:
 	var port = int(lan_port_input.text) if lan_port_input.text.is_valid_int() else DEFAULT_PORT
-	var ip_address = lan_ip_input.text if not lan_ip_input.text.is_empty() else DEFAULT_IP
+	var ip = lan_ip_input.text if not lan_ip_input.text.is_empty() else DEFAULT_IP
 	
-	var error = lan_peer.create_client(ip_address, port)
+	var error = lan_peer.create_client(ip, port)
 	if error != OK:
-		print("Failed to create LAN client. Error: ", error)
+		print("Failed to create LAN client: ", error)
 		return
 	
 	multiplayer.multiplayer_peer = lan_peer
-	print("Attempting to join LAN game at ", ip_address, ":", port)
-	_start_game_session()
+	print("Joining LAN at ", ip, ":", port)
+	# Client will spawn when connected_to_server fires
 
-# --- Player Spawning ---
+# ==============================================================================
+# Player Spawning
+# ==============================================================================
 
 func add_player(p_id: int) -> void:
+	if not player_spawner:
+		print("ERROR: PlayerSpawner not found!")
+		return
+	
 	var player = PLAYER.instantiate()
 	player.name = str(p_id)
-	# The MultiplayerSpawner will handle placing the player instance
-	# across the network correctly.
-	player_spawner.add_child(player, true)
-	print("Player %s added to the game." % p_id)
+	player_spawner.add_child(player)
+	print("Player %s added" % p_id)
+
+# ==============================================================================
+# Multiplayer Signals (HANDLES CLIENT SPAWNING)
+# ==============================================================================
+
+func _on_peer_connected(id: int) -> void:
+	print("Peer connected: ", id)
+	if multiplayer.is_server():
+		# If game already started, spawn player for this new peer
+		if get_node_or_null("/root/World"):
+			spawn_player_for.rpc_id(id)
+
+func _on_peer_disconnected(id: int) -> void:
+	print("Peer disconnected: ", id)
+
+func _on_connected_to_server() -> void:
+	print("Connected to server")
+	# CLIENT: Spawn self when connected
+	if not multiplayer.is_server():
+		spawn_player_for()
+		self.queue_free()
+
+func _on_connection_failed() -> void:
+	print("Connection failed")
+
+func _on_server_disconnected() -> void:
+	print("Server disconnected")
