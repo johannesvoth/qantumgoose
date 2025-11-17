@@ -1,0 +1,2 @@
+global gamestate.gd
+install plugin
