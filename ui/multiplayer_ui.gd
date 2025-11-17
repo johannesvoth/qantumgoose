@@ -1,5 +1,10 @@
 extends Control
 
+## HOT-SWAP CONFIGURATION: Change this to switch between networking systems
+## LOBBY_BASED = qantumgoose style (host_with_lobby/connect_to_lobby)
+## SOCKET_BASED = bomber demo style (create_host/create_client)
+@export var networking_mode: SteamNetworkAdapter.ConnectionMode = SteamNetworkAdapter.ConnectionMode.LOBBY_BASED
+
 @onready var multiplayer_ui: Control = $"."
 @onready var lobby_list: VBoxContainer = $SteamStuff/ScrollContainer/LobbyList
 @onready var text_edit_ip_adress_lan: TextEdit = $LANStuff/TextEditIPAdressLAN
@@ -11,10 +16,20 @@ const PLAYER = preload("res://player/player.tscn")
 @onready var world_spawner: MultiplayerSpawner = $"../WorldSpawner"
 
 var lobby_id: int = 0
-var steam_peer = SteamMultiplayerPeer.new()
+var network_adapter: SteamNetworkAdapter = null
 var lan_peer = ENetMultiplayerPeer.new()
 
 func _ready():
+	# Initialize network adapter with the selected mode
+	network_adapter = SteamNetworkAdapter.new()
+	network_adapter.connection_mode = networking_mode
+	add_child(network_adapter)
+	
+	# Connect adapter signals
+	network_adapter.connection_established.connect(_on_adapter_connection_established)
+	network_adapter.connection_failed.connect(_on_adapter_connection_failed)
+	network_adapter.lobby_joined.connect(_on_adapter_lobby_joined)
+	
 	# Connect Steam signals
 	Steam.lobby_created.connect(_on_lobby_created)
 	Steam.lobby_match_list.connect(_on_lobby_match_list)
@@ -28,10 +43,14 @@ func _on_lobby_joined(lobby_id: int, _permissions: int, _locked: bool, _response
 	if Steam.getLobbyOwner(lobby_id) == Steam.getSteamID():
 		return
 	
-	# We're joining someone else's lobby
-	steam_peer.connect_to_lobby(lobby_id)
-	multiplayer.multiplayer_peer = steam_peer
-	multiplayer_ui.hide()
+	# Use adapter to join - it handles both modes automatically
+	if networking_mode == SteamNetworkAdapter.ConnectionMode.LOBBY_BASED:
+		# Lobby-based: just pass the lobby_id
+		network_adapter.join_game(lobby_id)
+	else:
+		# Socket-based: need to get host Steam ID from lobby
+		var host_steam_id = Steam.getLobbyOwner(lobby_id)
+		network_adapter.join_game(lobby_id, host_steam_id)
 
 func _on_lobby_created(result: int, this_lobby_id: int) -> void:
 	if result == Steam.Result.RESULT_OK:
@@ -40,9 +59,14 @@ func _on_lobby_created(result: int, this_lobby_id: int) -> void:
 		Steam.setLobbyJoinable(lobby_id, true)
 		print("Created lobby: ", str(Steam.getPersonaName() + "'s Lobby"))
 		
-		# Now host with this lobby
-		steam_peer.host_with_lobby(lobby_id)
-		multiplayer.multiplayer_peer = steam_peer
+		# Use adapter to host - it handles both modes automatically
+		if networking_mode == SteamNetworkAdapter.ConnectionMode.LOBBY_BASED:
+			# Lobby-based: pass the lobby_id
+			network_adapter.host_game(lobby_id)
+		else:
+			# Socket-based: no lobby_id needed, just host
+			network_adapter.host_game()
+		
 		multiplayer_ui.hide()
 		
 		# Setup peer connection signal
@@ -55,6 +79,8 @@ func _on_lobby_created(result: int, this_lobby_id: int) -> void:
 		# Spawn world and add host player
 		world_spawner.spawn_world()
 		add_player(multiplayer.get_unique_id())
+	else:
+		print("Failed to create lobby")
 
 func _on_lobby_match_list(these_lobbies: Array) -> void:
 	# Clear existing lobby buttons
@@ -111,3 +137,16 @@ func add_player(p_id):
 	var player = PLAYER.instantiate()
 	player.name = str(p_id)
 	player_spawner.add_child(player, true)
+
+## Adapter signal handlers
+func _on_adapter_connection_established():
+	print("Network adapter: Connection established")
+	# Connection is ready, multiplayer.peer_connected will fire when players join
+
+func _on_adapter_connection_failed(reason: String):
+	print("Network adapter: Connection failed - ", reason)
+	# Could show error UI here if needed
+
+func _on_adapter_lobby_joined(lobby_id: int):
+	print("Network adapter: Joined lobby ", lobby_id)
+	# Lobby joined successfully
