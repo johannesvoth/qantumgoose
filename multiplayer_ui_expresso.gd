@@ -67,6 +67,8 @@ func _on_peer_disconnected(id: int) -> void:
 
 func _on_connected_to_server() -> void:
 	print("Successfully connected to server!")
+	# Client is now connected - add their player
+	add_player(multiplayer.get_unique_id())
 
 func _on_connection_failed() -> void:
 	print("Connection to server failed!")
@@ -214,10 +216,16 @@ func _on_lobby_created(result: int, this_lobby_id: int) -> void:
 	multiplayer.multiplayer_peer = steam_peer
 	print("Multiplayer peer set as host, unique ID: ", multiplayer.get_unique_id())
 		
-	# Listen for new players connecting
-	multiplayer.peer_connected.connect(add_player)
+	# Listen for new players connecting - this fires when clients join
+	multiplayer.peer_connected.connect(_on_player_joined)
 	
 	_start_game_session()
+
+func _on_player_joined(id: int) -> void:
+	print("New player joined with ID: ", id)
+	# This is called on the SERVER when a new client connects
+	# Spawn the player for the newly connected client
+	add_player(id)
 
 func _on_lobby_joined(joined_lobby_id: int, _permissions: int, _locked: bool, response: int) -> void:
 	print("_on_lobby_joined called - Lobby: %s, Response: %s" % [joined_lobby_id, response])
