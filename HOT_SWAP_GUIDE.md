@@ -43,10 +43,25 @@ The `SteamNetworkAdapter` class (in `other/steam_network_adapter.gd`) handles al
 
 Both modes use the same underlying `SteamMultiplayerPeer` addon, so they're functionally equivalent - just different APIs!
 
+## Joining by Lobby ID Code
+
+Both modes now support joining by lobby ID code (like the bomber demo):
+
+1. **In the Steam area**, you'll see a "Join by Lobby ID Code" button
+2. Enter the lobby ID code in the text field
+3. Click the button to join
+
+**How it works:**
+- **Lobby-based mode**: Directly connects via the lobby
+- **Socket-based mode**: Joins the Steam lobby first to get the host's Steam ID, then connects via socket (bomber demo style)
+
+This matches the bomber demo's behavior where you could enter a lobby ID to join!
+
 ## Testing
 
 1. Set the mode you want to test
 2. Run the game
 3. Try hosting and joining games
-4. Switch modes and test again - no other changes needed!
+4. Try joining by lobby ID code
+5. Switch modes and test again - no other changes needed!
 

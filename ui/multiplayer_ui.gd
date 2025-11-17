@@ -9,6 +9,7 @@ extends Control
 @onready var lobby_list: VBoxContainer = $SteamStuff/ScrollContainer/LobbyList
 @onready var text_edit_ip_adress_lan: TextEdit = $LANStuff/TextEditIPAdressLAN
 @onready var text_edit_port_lan: TextEdit = $LANStuff/TextEditPortLAN
+@onready var lobby_id_code_input: TextEdit = $SteamStuff/LobbyIDCodeInput
 
 const PLAYER = preload("res://player/player.tscn")
 
@@ -39,6 +40,12 @@ func _on_steam_join(lobby_id: int):
 	Steam.joinLobby(lobby_id)
 
 func _on_lobby_joined(lobby_id: int, _permissions: int, _locked: bool, _response: int) -> void:
+	if _response != 1:
+		# Handle join failure
+		print("Failed to join lobby, response code: ", _response)
+		network_adapter.connection_failed.emit("Failed to join lobby")
+		return
+	
 	# Check if we're the owner (host) - if so, ignore this signal
 	if Steam.getLobbyOwner(lobby_id) == Steam.getSteamID():
 		return
@@ -48,9 +55,9 @@ func _on_lobby_joined(lobby_id: int, _permissions: int, _locked: bool, _response
 		# Lobby-based: just pass the lobby_id
 		network_adapter.join_game(lobby_id)
 	else:
-		# Socket-based: need to get host Steam ID from lobby
-		var host_steam_id = Steam.getLobbyOwner(lobby_id)
-		network_adapter.join_game(lobby_id, host_steam_id)
+		# Socket-based: complete the join using the adapter's helper
+		# This gets the host Steam ID from the lobby and connects via socket
+		network_adapter.complete_socket_join_from_lobby(lobby_id)
 
 func _on_lobby_created(result: int, this_lobby_id: int) -> void:
 	if result == Steam.Result.RESULT_OK:
@@ -132,6 +139,25 @@ func _on_join_lan_pressed() -> void:
 	lan_peer.create_client(hostname, int(port))
 	multiplayer.multiplayer_peer = lan_peer
 	multiplayer_ui.hide()
+
+## Join Steam game by lobby ID code (bomber demo style)
+## Works in both modes, but especially useful for socket-based mode
+func _on_join_steam_by_code_pressed() -> void:
+	var lobby_id_code = lobby_id_code_input.text.strip_edges()
+	if lobby_id_code.is_empty():
+		print("Please enter a lobby ID code")
+		return
+	
+	# Use adapter to join by lobby ID code
+	# This will handle both modes appropriately:
+	# - Lobby-based: directly connects via lobby
+	# - Socket-based: joins Steam lobby first, then connects via socket
+	if network_adapter.join_by_lobby_id_code(lobby_id_code):
+		print("Joining lobby: ", lobby_id_code)
+		# The actual connection will complete in _on_lobby_joined callback
+		multiplayer_ui.hide()
+	else:
+		print("Failed to start join process")
 
 func add_player(p_id):
 	var player = PLAYER.instantiate()

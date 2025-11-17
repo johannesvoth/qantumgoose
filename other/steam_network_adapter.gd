@@ -40,6 +40,26 @@ func join_game(lobby_id: int = -1, host_steam_id: int = -1) -> bool:
 				return false
 		return _join_socket_based(host_steam_id)
 
+## Join by lobby ID code (works in both modes, but socket-based needs to join Steam lobby first)
+## This is the bomber demo style - enter lobby ID, join Steam lobby, then connect via socket
+func join_by_lobby_id_code(lobby_id_code: String) -> bool:
+	var lobby_id = lobby_id_code.to_int()
+	if lobby_id <= 0:
+		connection_failed.emit("Invalid lobby ID code")
+		return false
+	
+	# Store the lobby_id for when Steam lobby join completes
+	current_lobby_id = lobby_id
+	
+	if connection_mode == ConnectionMode.LOBBY_BASED:
+		# Lobby-based: directly connect via lobby
+		return _join_lobby_based(lobby_id)
+	else:
+		# Socket-based: first join Steam lobby to get owner's Steam ID
+		# The actual socket connection will happen in _on_lobby_joined callback
+		Steam.joinLobby(lobby_id)
+		return true  # Will complete asynchronously via Steam callback
+
 ## Lobby-based hosting (qantumgoose style)
 func _host_lobby_based(lobby_id: int) -> bool:
 	if lobby_id == -1:
@@ -91,6 +111,21 @@ func get_host_steam_id_from_lobby(lobby_id: int) -> int:
 	if lobby_id == -1:
 		return -1
 	return Steam.getLobbyOwner(lobby_id)
+
+## Called when Steam lobby join completes (for socket-based mode)
+## This completes the join_by_lobby_id_code flow
+## Should be called from the Steam lobby_joined callback
+func complete_socket_join_from_lobby(lobby_id: int) -> bool:
+	if connection_mode != ConnectionMode.SOCKET_BASED:
+		return false
+	
+	var host_steam_id = Steam.getLobbyOwner(lobby_id)
+	if host_steam_id == Steam.getSteamID():
+		# We're the host, shouldn't happen but handle it
+		connection_failed.emit("Cannot join own lobby as client")
+		return false
+	
+	return _join_socket_based(host_steam_id)
 
 ## Helper: Switch connection mode at runtime
 func set_connection_mode(mode: ConnectionMode):
