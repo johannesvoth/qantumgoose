@@ -1,37 +1,29 @@
 extends Control
 
-# --- Constants and Preloads ---
 const PLAYER = preload("res://player/player.tscn")
 const DEFAULT_PORT = 7777
 const DEFAULT_IP = "127.0.0.1"
 
-# --- Scene References ---
 @onready var player_spawner: MultiplayerSpawner = get_node_or_null("../PlayerSpawner")
 @onready var world_spawner: MultiplayerSpawner = get_node_or_null("../WorldSpawner")
 
-# --- UI Node References ---
 var lobby_list: VBoxContainer
 var lan_ip_input: LineEdit
 var lan_port_input: LineEdit
 
-# --- Networking Peers ---
 var steam_peer = SteamMultiplayerPeer.new()
 var lan_peer = ENetMultiplayerPeer.new()
 
 var lobby_id: int = 0
 
-# ==============================================================================
-# Godot Lifecycle & UI Building
-# ==============================================================================
-
 func _ready() -> void:
 	if not player_spawner or not world_spawner:
-		push_error("PlayerSpawner or WorldSpawner not found. This script requires them as siblings.")
+		push_error("Spawners not found!")
 		set_process(false)
 		return
 	
 	var init_result = Steam.steamInitEx(true, 480)
-	print("Steam initialization: ", init_result)
+	print("Steam init: ", init_result)
 	Steam.initRelayNetworkAccess()
 	
 	_build_ui()
@@ -66,7 +58,6 @@ func _build_ui() -> void:
 	
 	main_vbox.add_child(HSeparator.new())
 
-	# Steam UI
 	var steam_label = Label.new()
 	steam_label.text = "Steam Multiplayer"
 	main_vbox.add_child(steam_label)
@@ -92,7 +83,6 @@ func _build_ui() -> void:
 	lobby_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll_container.add_child(lobby_list)
 
-	# LAN UI
 	main_vbox.add_child(HSeparator.new())
 	
 	var lan_label = Label.new()
@@ -133,32 +123,27 @@ func _build_ui() -> void:
 	lan_actions_hbox.add_child(join_lan_button)
 
 # ==============================================================================
-# Game Start Orchestration (EXPRESSOBITS PATTERN)
+# GAME START ORCHESTRATION (EXPRESSOBITS PATTERN)
 # ==============================================================================
 
 func _start_game_session() -> void:
-	# HOST: Spawn world and trigger player spawning on all peers
 	if multiplayer.is_server():
+		print("Host: Spawning world...")
 		world_spawner.spawn_world()
-		print("Host starting game, spawning players for all peers...")
+		await get_tree().process_frame  # Wait for world to exist
+		print("Host: Spawning players via RPC...")
 		spawn_player_for.rpc()
 	else:
-		# CLIENT: Will spawn via RPC from host
-		print("Client waiting for spawn signal...")
+		print("Client: Waiting for host to start game...")
 
-func _exit_tree() -> void:
-	# Clean up UI removal
-	self.queue_free()
-
-# This is the KEY RPC that runs on ALL peers when host starts game
 @rpc("authority", "call_local", "reliable")
 func spawn_player_for() -> void:
 	var my_id = multiplayer.get_unique_id()
-	print("Spawning player for ID: ", my_id)
+	print("Spawning player for peer: ", my_id)
 	add_player(my_id)
 
 # ==============================================================================
-# Steam Callbacks
+# STEAM CALLBACKS
 # ==============================================================================
 
 func _on_host_steam_pressed() -> void:
@@ -173,22 +158,22 @@ func _on_steam_join(lobby_to_join_id: int) -> void:
 
 func _on_lobby_created(result: int, this_lobby_id: int) -> void:
 	if result != Steam.Result.RESULT_OK:
-		print("Failed to create Steam lobby: ", result)
+		print("Lobby creation failed: ", result)
 		return
 		
 	lobby_id = this_lobby_id
 	Steam.setLobbyData(lobby_id, "name", str(Steam.getPersonaName() + "'s Lobby"))
 	Steam.setLobbyJoinable(lobby_id, true)
-	print("Created lobby: ", lobby_id)
+	print("Lobby created: ", lobby_id)
 	
 	var error = steam_peer.create_host(0)
 	if error != OK:
-		print("Failed to create host: ", error)
+		print("Host creation failed: ", error)
 		return
 		
 	multiplayer.multiplayer_peer = steam_peer
-	print("Host peer set, ID: ", multiplayer.get_unique_id())
-		
+	print("Host peer ready, ID: ", multiplayer.get_unique_id())
+	
 	_start_game_session()
 	self.queue_free()
 
@@ -213,18 +198,18 @@ func _on_lobby_joined(joined_lobby_id: int, _permissions: int, _locked: bool, re
 	print("Lobby owner: ", owner_id, " My ID: ", Steam.getSteamID())
 	
 	if owner_id == Steam.getSteamID():
-		print("I am the host, skipping client setup")
+		print("I am the host, already set up")
 		return
 	
-	print("Joining as client to: ", owner_id)
+	print("Connecting to host: ", owner_id)
 	
 	var error = steam_peer.create_client(owner_id, 0)
 	if error != OK:
-		print("Failed to create client: ", error)
+		print("Client connection failed: ", error)
 		return
 		
 	multiplayer.multiplayer_peer = steam_peer
-	# Client will spawn when connected_to_server fires
+	print("Client peer ready")
 
 func _on_lobby_match_list(these_lobbies: Array) -> void:
 	for child in lobby_list.get_children():
@@ -242,14 +227,14 @@ func _on_lobby_match_list(these_lobbies: Array) -> void:
 		lobby_list.add_child(button)
 
 # ==============================================================================
-# LAN Callbacks
+# LAN CALLBACKS
 # ==============================================================================
 
 func _on_host_lan_pressed() -> void:
 	var port = int(lan_port_input.text) if lan_port_input.text.is_valid_int() else DEFAULT_PORT
 	var error = lan_peer.create_server(port)
 	if error != OK:
-		print("Failed to create LAN server: ", error)
+		print("LAN server failed: ", error)
 		return
 		
 	multiplayer.multiplayer_peer = lan_peer
@@ -263,45 +248,47 @@ func _on_join_lan_pressed() -> void:
 	
 	var error = lan_peer.create_client(ip, port)
 	if error != OK:
-		print("Failed to create LAN client: ", error)
+		print("LAN client failed: ", error)
 		return
 	
 	multiplayer.multiplayer_peer = lan_peer
-	print("Joining LAN at ", ip, ":", port)
-	# Client will spawn when connected_to_server fires
+	print("LAN client connecting to ", ip, ":", port)
 
 # ==============================================================================
-# Player Spawning
+# PLAYER SPAWNING (CRITICAL FIX)
 # ==============================================================================
 
 func add_player(p_id: int) -> void:
-	if not player_spawner:
-		print("ERROR: PlayerSpawner not found!")
+	if not player_spawner or not player_spawner.is_inside_tree():
+		print("ERROR: PlayerSpawner not ready!")
 		return
 	
 	var player = PLAYER.instantiate()
 	player.name = str(p_id)
-	player_spawner.add_child(player)
-	print("Player %s added" % p_id)
+	# CRITICAL: Set authority to the owning peer BEFORE adding
+	player.set_multiplayer_authority(p_id)
+	# Add with force_replication=true
+	player_spawner.add_child(player, true)
+	print("Player %s spawned with authority %s" % [p_id, p_id])
 
 # ==============================================================================
-# Multiplayer Signals (HANDLES CLIENT SPAWNING)
+# MULTIPLAYER SIGNALS
 # ==============================================================================
 
 func _on_peer_connected(id: int) -> void:
 	print("Peer connected: ", id)
-	if multiplayer.is_server():
-		# If game already started, spawn player for this new peer
-		if get_node_or_null("/root/World"):
-			spawn_player_for.rpc_id(id)
+	# Late join support: if game running, spawn player for new peer
+	if multiplayer.is_server() and get_node_or_null("/root/World"):
+		print("Late join - spawning for: ", id)
+		spawn_player_for.rpc_id(id)
 
 func _on_peer_disconnected(id: int) -> void:
 	print("Peer disconnected: ", id)
 
 func _on_connected_to_server() -> void:
 	print("Connected to server")
-	# CLIENT: Spawn self when connected
 	if not multiplayer.is_server():
+		print("Client: Spawning self...")
 		spawn_player_for()
 		self.queue_free()
 
