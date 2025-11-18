@@ -14,6 +14,9 @@ var lobby_id: int = 0
 var steam_peer = SteamMultiplayerPeer.new()
 var lan_peer = ENetMultiplayerPeer.new()
 
+var LOBBY_NAME= "BAD"
+var LOBBY_MODE= "AHH"
+
 func _ready():
 	# Connect Steam signals
 	Steam.lobby_created.connect(_on_lobby_created)
@@ -36,8 +39,10 @@ func _on_lobby_joined(lobby_id: int, _permissions: int, _locked: bool, _response
 func _on_lobby_created(result: int, this_lobby_id: int) -> void:
 	if result == Steam.Result.RESULT_OK:
 		lobby_id = this_lobby_id
-		Steam.setLobbyData(lobby_id, "name", str(Steam.getPersonaName() + "'s Lobby"))
+		#Steam.setLobbyData(lobby_id, "name", str(Steam.getPersonaName() + "'s Lobby"))
 		Steam.setLobbyJoinable(lobby_id, true)
+		Steam.setLobbyData(lobby_id, "name", LOBBY_NAME)
+		Steam.setLobbyData(lobby_id, "mode", LOBBY_MODE)
 		print("Created lobby: ", str(Steam.getPersonaName() + "'s Lobby"))
 		
 		# Now host with this lobby
@@ -76,8 +81,9 @@ func _on_lobby_match_list(these_lobbies: Array) -> void:
 		lobby_list.add_child(lobby_button)
 
 func _on_refresh_lobbies_button_pressed() -> void:
-	Steam.addRequestLobbyListDistanceFilter(Steam.LOBBY_DISTANCE_FILTER_WORLDWIDE)
 	print("305 Mr. Worldwide Requesting a lobby list")
+	Steam.addRequestLobbyListDistanceFilter(Steam.LOBBY_DISTANCE_FILTER_WORLDWIDE)
+	Steam.addRequestLobbyListStringFilter("name", LOBBY_MODE, Steam.LOBBY_COMPARISON_EQUAL)
 	Steam.requestLobbyList()
 
 func _on_host_steam_pressed() -> void:
