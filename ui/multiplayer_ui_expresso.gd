@@ -10,16 +10,25 @@ const PLAYER = preload("res://player/player.tscn")
 @onready var lobby_list: VBoxContainer = $SteamStuff/ScrollContainer/LobbyList
 
 func add_player(p_id):
-	print("add player called")
+	print("add player called for id: ", p_id)
 	var player = PLAYER.instantiate()
 	player.name = str(p_id)
 	player_spawner.add_child(player, true)
+
+# This gets called when a new peer connects (HOST SIDE)
+func _player_connected(id):
+	print("_player_connected called for id: ", id)
+	# When someone connects to us (the host), create their player
+	add_player(id)
 
 # --- utils over. Now LAN
 
 func _on_host_lan_pressed() -> void:
 	pass # Replace with function body.
 
+
+# Names for remote players in id:name format.
+var players = {}
 
 func _on_join_lan_pressed() -> void:
 	pass # Replace with function body.
@@ -34,9 +43,12 @@ func _ready() -> void:
 	var initialize_response: Dictionary = Steam.steamInitEx(true, 480)
 	print("Did Steam initialize?: %s " % initialize_response)
 	
+	# IMPORTANT: Connect this in _ready so it works for both host and client
+	multiplayer.peer_connected.connect(self._player_connected)
+	
 	Steam.lobby_created.connect(func(connect: int, lobby_id: int) -> void:
 		print("lobby created callback: " + str(lobby_id))
-		if connect == 1: # succesfull lobby join
+		if connect == 1: # successful lobby join
 			Steam.setLobbyData(lobby_id, "name", str(Steam.getPersonaName() + "'s Lobby"))
 			Steam.setLobbyJoinable(lobby_id, true)
 			
@@ -44,11 +56,12 @@ func _ready() -> void:
 			var error = steam_peer.create_host(0)
 			if error == OK:
 				multiplayer.set_multiplayer_peer(steam_peer)
-				add_player(1)
+				add_player(1)  # Add the host player
 				
 				# also create the world
 				world_spawner.spawn_world()
-			else: print("failed to create host: " + str(error))
+			else: 
+				print("failed to create host: " + str(error))
 		)
 		
 	Steam.lobby_match_list.connect(func(lobbies: Array) -> void:
@@ -56,7 +69,7 @@ func _ready() -> void:
 			for n in lobby_list.get_children():
 				n.queue_free()
 	
-	# Create button for each lobby
+		# Create button for each lobby
 		for this_lobby in lobbies:
 			var lobby_name: String = Steam.getLobbyData(this_lobby, "name")
 			var lobby_mode: String = Steam.getLobbyData(this_lobby, "mode")
@@ -74,14 +87,13 @@ func _ready() -> void:
 		if response == 1:
 			print("lobby joined callback")
 			var id = Steam.getLobbyOwner(lobby)
-			if id != Steam.getSteamID(): # lobby joined gets called for the host, this code is only run by the host
-				print("creating add client code and creating player")
-				steam_peer.create_client(id, 0) # TODO: could catch errors here too
+			if id != Steam.getSteamID(): 
+				print("Joining as client, creating connection to host")
+				
+				steam_peer.create_client(id, 0)
 				multiplayer.set_multiplayer_peer(steam_peer)
 				
-				
-				print(id)
-				print(multiplayer.get_unique_id())
+				# Add our own player (the client)
 				add_player(multiplayer.get_unique_id())
 		else:
 			# Get the failure reason
@@ -113,3 +125,7 @@ func _on_refresh_lobbies_button_pressed() -> void:
 	Steam.addRequestLobbyListDistanceFilter(Steam.LOBBY_DISTANCE_FILTER_WORLDWIDE)
 	print("305 Mr. Worldwide Requesting a lobby list")
 	Steam.requestLobbyList()
+
+
+func _on_beging_game_button_pressed() -> void:
+	assert(multiplayer.is_server())
