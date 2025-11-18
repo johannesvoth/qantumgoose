@@ -26,7 +26,7 @@ func lobby_joined(lobby: int, permissions: int, locked: bool, response: int):
 
 func join_requested(lobby_id: int, steam_id: int):
 	print("Join requested - Lobby: ", lobby_id, " from user: ", steam_id)
-	join.emit(lobby_id)
+	# join.emit(lobby_id)
 
 func _process(delta):
 	Steam.run_callbacks()

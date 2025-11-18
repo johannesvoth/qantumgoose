@@ -14,7 +14,18 @@ var lobby_id: int = 0
 var steam_peer = SteamMultiplayerPeer.new()
 var lan_peer = ENetMultiplayerPeer.new()
 
+func _process(delta: float) -> void:
+	Steam.run_callbacks()
+
 func _ready():
+	
+	OS.set_environment("SteamAppId", str(480))
+	OS.set_environment("SteamGameId", str(480))
+	
+	var init_result = Steam.steamInitEx(false)
+	
+	Steam.initRelayNetworkAccess()
+	
 	# Connect Steam signals
 	Steam.lobby_created.connect(_on_lobby_created)
 	Steam.lobby_match_list.connect(_on_lobby_match_list)

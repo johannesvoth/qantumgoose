@@ -1,0 +1,100 @@
+[gd_scene load_steps=2 format=3 uid="uid://c0yy1x7k7kdjp"]
+
+[ext_resource type="Script" uid="uid://n0yerfo268j3" path="res://ui/multiplayer_ui_expresso.gd" id="1_mu865"]
+
+[node name="MultiplayerUIExpresso" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_mu865")
+
+[node name="LANStuff" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="LanAreaLabel" type="Label" parent="LANStuff"]
+layout_mode = 0
+offset_left = 25.0
+offset_top = 51.0
+offset_right = 102.0
+offset_bottom = 74.0
+text = "LAN Area:"
+
+[node name="HostLAN" type="Button" parent="LANStuff"]
+layout_mode = 0
+offset_left = 37.0
+offset_top = 100.0
+offset_right = 111.0
+offset_bottom = 131.0
+text = "Host LAN"
+
+[node name="JoinLAN" type="Button" parent="LANStuff"]
+layout_mode = 0
+offset_left = 67.0
+offset_top = 205.0
+offset_right = 147.0
+offset_bottom = 236.0
+text = "Join LAN"
+
+[node name="TextEditIPAdressLAN" type="TextEdit" parent="LANStuff"]
+layout_mode = 0
+offset_left = 17.0
+offset_top = 254.0
+offset_right = 206.0
+offset_bottom = 295.0
+text = "localhost"
+
+[node name="TextEditPortLAN" type="TextEdit" parent="LANStuff"]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 307.0
+offset_right = 205.0
+offset_bottom = 348.0
+text = "30455"
+
+[node name="SteamStuff" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="HostSteam" type="Button" parent="SteamStuff"]
+layout_mode = 0
+offset_left = 238.0
+offset_top = 73.0
+offset_right = 436.0
+offset_bottom = 104.0
+text = "Host Public Steam Game"
+
+[node name="RefreshLobbiesButton" type="Button" parent="SteamStuff"]
+layout_mode = 0
+offset_left = 465.0
+offset_top = 74.0
+offset_right = 615.0
+offset_bottom = 105.0
+text = "Refresh Lobby List"
+
+[node name="Label" type="Label" parent="SteamStuff"]
+layout_mode = 0
+offset_left = 330.0
+offset_top = 21.0
+offset_right = 572.0
+offset_bottom = 44.0
+text = "Steam Area: (click lobby to join)"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="SteamStuff"]
+custom_minimum_size = Vector2(400, 200)
+layout_mode = 0
+offset_left = 220.0
+offset_top = 149.008
+offset_right = 620.0
+offset_bottom = 349.008
+
+[node name="LobbyList" type="VBoxContainer" parent="SteamStuff/ScrollContainer"]
+custom_minimum_size = Vector2(400, 200)
+layout_mode = 2
+
+[connection signal="pressed" from="LANStuff/HostLAN" to="." method="_on_host_lan_pressed"]
+[connection signal="pressed" from="LANStuff/JoinLAN" to="." method="_on_join_lan_pressed"]
+[connection signal="pressed" from="SteamStuff/HostSteam" to="." method="_on_host_steam_pressed"]

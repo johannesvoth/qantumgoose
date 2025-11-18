@@ -1,17 +1,11 @@
-[gd_scene load_steps=5 format=3 uid="uid://b1mx35emj5usl"]
+[gd_scene load_steps=3 format=3 uid="uid://b1mx35emj5usl"]
 
-[ext_resource type="Script" uid="uid://dox5423r4l3pb" path="res://other/steam.gd" id="1_80nbo"]
-[ext_resource type="Script" uid="uid://ckc1j5hy6m2gs" path="res://game.gd" id="1_e2o6t"]
-[ext_resource type="PackedScene" uid="uid://75efyn1wxwpt" path="res://ui/multiplayer_ui.tscn" id="3_feb5d"]
+[ext_resource type="PackedScene" uid="uid://c0yy1x7k7kdjp" path="res://ui/multiplayer_ui_expresso.tscn" id="3_fc0e3"]
 [ext_resource type="Script" uid="uid://bol1tu2w36k4e" path="res://world_spawner.gd" id="4_fc0e3"]
 
 [node name="Game" type="Node2D"]
-script = ExtResource("1_e2o6t")
 
 [node name="Steam" type="Node" parent="."]
-script = ExtResource("1_80nbo")
-
-[node name="MultiplayerUI" parent="." instance=ExtResource("3_feb5d")]
 
 [node name="WorldSlot" type="Node" parent="."]
 
@@ -23,3 +17,5 @@ script = ExtResource("4_fc0e3")
 [node name="PlayerSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("uid://bbrh0u7rgtlo3")
 spawn_path = NodePath(".")
+
+[node name="MultiplayerUIExpresso" parent="." instance=ExtResource("3_fc0e3")]
