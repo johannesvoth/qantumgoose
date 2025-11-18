@@ -77,7 +77,10 @@ func _ready() -> void:
 				steam_peer.create_client(id, 0) # TODO: could catch errors here too
 				multiplayer.set_multiplayer_peer(steam_peer)
 				
-				add_player(id)
+				
+				print(id)
+				print(multiplayer.get_unique_id())
+				add_player(multiplayer.get_unique_id())
 		else:
 			# Get the failure reason
 			var FAIL_REASON: String
