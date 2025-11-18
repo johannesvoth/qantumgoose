@@ -98,3 +98,4 @@ layout_mode = 2
 [connection signal="pressed" from="LANStuff/HostLAN" to="." method="_on_host_lan_pressed"]
 [connection signal="pressed" from="LANStuff/JoinLAN" to="." method="_on_join_lan_pressed"]
 [connection signal="pressed" from="SteamStuff/HostSteam" to="." method="_on_host_steam_pressed"]
+[connection signal="pressed" from="SteamStuff/RefreshLobbiesButton" to="." method="_on_refresh_lobbies_button_pressed"]
