@@ -72,8 +72,10 @@ func _ready() -> void:
 	
 	Steam.lobby_joined.connect(func(lobby: int, permissions: int, locked: bool, response: int) -> void:
 		if response == 1:
+			print("lobby joined callback")
 			var id = Steam.getLobbyOwner(lobby)
-			if id != Steam.getSteamID():
+			if id != Steam.getSteamID(): # lobby joined gets called for the host, this code is only run by the host
+				print("creating add client code and creating player")
 				steam_peer.create_client(id, 0) # TODO: could catch errors here too
 				multiplayer.set_multiplayer_peer(steam_peer)
 				
