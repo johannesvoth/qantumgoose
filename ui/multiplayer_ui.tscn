@@ -8,7 +8,6 @@ anchors_preset = 0
 script = ExtResource("1_jt4se")
 
 [node name="LANStuff" type="Control" parent="."]
-layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
@@ -54,7 +53,6 @@ offset_bottom = 348.0
 text = "30455"
 
 [node name="SteamStuff" type="Control" parent="."]
-layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
@@ -85,7 +83,7 @@ text = "Steam Area: (click lobby to join)"
 
 [node name="ScrollContainer" type="ScrollContainer" parent="SteamStuff"]
 custom_minimum_size = Vector2(400, 200)
-layout_mode = 2
+layout_mode = 0
 offset_left = 220.0
 offset_top = 149.008
 offset_right = 620.0

@@ -1,0 +1,62 @@
+[gd_scene load_steps=2 format=3 uid="uid://0ibpp01iafns"]
+
+[ext_resource type="Script" uid="uid://0g88xu5pdrf2" path="res://ui/expresso_ui.gd" id="1_apv8t"]
+
+[node name="ExpressoUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_apv8t")
+
+[node name="SteamStuff" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="HostSteam" type="Button" parent="SteamStuff"]
+layout_mode = 0
+offset_left = 238.0
+offset_top = 73.0
+offset_right = 436.0
+offset_bottom = 104.0
+text = "Host Public Steam Game"
+
+[node name="RefreshLobbiesButton" type="Button" parent="SteamStuff"]
+layout_mode = 0
+offset_left = 465.0
+offset_top = 74.0
+offset_right = 615.0
+offset_bottom = 105.0
+text = "Refresh Lobby List"
+
+[node name="Label" type="Label" parent="SteamStuff"]
+layout_mode = 0
+offset_left = 330.0
+offset_top = 21.0
+offset_right = 572.0
+offset_bottom = 44.0
+text = "Steam Area: (click lobby to join)"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="SteamStuff"]
+custom_minimum_size = Vector2(400, 200)
+layout_mode = 0
+offset_left = 220.0
+offset_top = 149.008
+offset_right = 620.0
+offset_bottom = 349.008
+
+[node name="LobbyList" type="VBoxContainer" parent="SteamStuff/ScrollContainer"]
+custom_minimum_size = Vector2(400, 200)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+text = "EXPRESSO UI"
+
+[connection signal="pressed" from="SteamStuff/HostSteam" to="." method="_on_host_steam_pressed"]
+[connection signal="pressed" from="SteamStuff/RefreshLobbiesButton" to="." method="_on_refresh_lobbies_button_pressed"]
