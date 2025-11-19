@@ -6,6 +6,7 @@
 [node name="Game3D" type="Node3D"]
 
 [node name="TitleScreen" parent="." instance=ExtResource("1_p5xin")]
+debug_mode = false
 
 [node name="PlayerSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("uid://bbrh0u7rgtlo3")

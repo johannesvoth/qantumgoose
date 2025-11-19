@@ -15,9 +15,12 @@ func spawnProjectile(data):
 	b.set_multiplayer_authority(auth)
 	return b
 
+@onready var camera_2d: Camera2D = $Camera2D
+
 func _ready() -> void:
 	#util_spawner.spawn_function = spawnProjectile
-	pass
+	if not is_multiplayer_authority():
+		camera_2d.queue_free()
 
 func _enter_tree() -> void:
 	set_multiplayer_authority(int(str(name)))
