@@ -1,0 +1,20 @@
+[gd_scene load_steps=3 format=3 uid="uid://dp66q3lucudas"]
+
+[ext_resource type="PackedScene" uid="uid://dudiorgltgrx6" path="res://systems/title_screen.tscn" id="1_p5xin"]
+[ext_resource type="Script" uid="uid://bol1tu2w36k4e" path="res://world_spawner.gd" id="2_1swmi"]
+
+[node name="Game3D" type="Node3D"]
+
+[node name="TitleScreen" parent="." instance=ExtResource("1_p5xin")]
+
+[node name="PlayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("uid://bbrh0u7rgtlo3")
+spawn_path = NodePath(".")
+
+[node name="WorldSpawner" type="MultiplayerSpawner" parent="." node_paths=PackedStringArray("world_slot")]
+_spawnable_scenes = PackedStringArray("uid://b27by4d24t3vc")
+spawn_path = NodePath("../WorldSlot")
+script = ExtResource("2_1swmi")
+world_slot = NodePath("../WorldSlot")
+
+[node name="WorldSlot" type="Node" parent="."]

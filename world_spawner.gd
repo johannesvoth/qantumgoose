@@ -1,6 +1,6 @@
 extends MultiplayerSpawner
 
-@onready var world_slot: Node = $"../WorldSlot"
+@export var world_slot: Node
 
 func spawn_world() -> void:
 	var world_load = load("res://world/world.tscn")

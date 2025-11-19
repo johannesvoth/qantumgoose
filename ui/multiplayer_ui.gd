@@ -7,14 +7,48 @@ extends Control
 
 const PLAYER = preload("res://player/player.tscn")
 
-@onready var player_spawner: MultiplayerSpawner = $"../PlayerSpawner"
-@onready var world_spawner: MultiplayerSpawner = $"../WorldSpawner"
+@onready var player_spawner: MultiplayerSpawner = $"../../PlayerSpawner"
+@onready var world_spawner: MultiplayerSpawner = $"../../WorldSpawner"
+
 
 var lobby_id: int = 0
 var steam_peer = SteamMultiplayerPeer.new()
 var lan_peer = ENetMultiplayerPeer.new()
 
+signal join(int)
+
+func lobby_invite(inviter: int, lobby: int, game: int):
+	print("Steam lobby invite from user: ", inviter)
+
+func lobby_joined(lobby: int, permissions: int, locked: bool, response: int):
+	print("Lobby joined: ", lobby, " Response: ", response)
+
+func join_requested(lobby_id: int, steam_id: int):
+	print("Join requested - Lobby: ", lobby_id, " from user: ", steam_id)
+	join.emit(lobby_id)
+
+func _process(delta):
+	Steam.run_callbacks()
+
+
 func _ready():
+	#--- from steam node
+	# Initialize Steam (using SpaceWar app ID 480 for testing)
+	OS.set_environment("SteamAppId", str(480))
+	OS.set_environment("SteamGameId", str(480))
+	
+	var init_result = Steam.steamInitEx(false)
+	print("Steam initialization: ", init_result)
+	
+	# Initialize relay network access for P2P connections
+	Steam.initRelayNetworkAccess()
+	
+	# Connect signals
+	Steam.lobby_invite.connect(lobby_invite)
+	Steam.lobby_joined.connect(lobby_joined)
+	Steam.join_requested.connect(join_requested)	
+	#--- from steam node end
+	
 	# Connect Steam signals
 	Steam.lobby_created.connect(_on_lobby_created)
 	Steam.lobby_match_list.connect(_on_lobby_match_list)

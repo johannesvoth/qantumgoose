@@ -22,18 +22,18 @@ text = "LAN Area:"
 
 [node name="HostLAN" type="Button" parent="LANStuff"]
 layout_mode = 0
-offset_left = 37.0
-offset_top = 100.0
-offset_right = 111.0
-offset_bottom = 131.0
+offset_left = 28.0
+offset_top = 196.0
+offset_right = 108.0
+offset_bottom = 227.0
 text = "Host LAN"
 
 [node name="JoinLAN" type="Button" parent="LANStuff"]
 layout_mode = 0
-offset_left = 67.0
-offset_top = 205.0
-offset_right = 147.0
-offset_bottom = 236.0
+offset_left = 120.0
+offset_top = 196.0
+offset_right = 200.0
+offset_bottom = 227.0
 text = "Join LAN"
 
 [node name="TextEditIPAdressLAN" type="TextEdit" parent="LANStuff"]

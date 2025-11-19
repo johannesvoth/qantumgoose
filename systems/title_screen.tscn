@@ -1,0 +1,80 @@
+[gd_scene load_steps=3 format=3 uid="uid://dudiorgltgrx6"]
+
+[ext_resource type="Script" uid="uid://c8ehe2f6r8uyb" path="res://systems/title_screen.gd" id="1_xacxm"]
+[ext_resource type="PackedScene" uid="uid://75efyn1wxwpt" path="res://ui/multiplayer_ui.tscn" id="2_ujegd"]
+
+[node name="TitleScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_xacxm")
+
+[node name="MainMenu" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="MainMenu"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 258.0
+offset_right = 342.0
+offset_bottom = 40.0
+grow_horizontal = 2
+
+[node name="GameTitleLabel" type="Label" parent="MainMenu/MarginContainer"]
+layout_mode = 2
+text = "Game Title"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MainMenu"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = 92.0
+offset_right = 200.0
+offset_bottom = 228.0
+grow_vertical = 2
+
+[node name="NewGameButton" type="Button" parent="MainMenu/VBoxContainer"]
+layout_mode = 2
+text = "New Game"
+
+[node name="LoadGameButton" type="Button" parent="MainMenu/VBoxContainer"]
+layout_mode = 2
+text = "Load Game"
+
+[node name="MultiplayerButton" type="Button" parent="MainMenu/VBoxContainer"]
+layout_mode = 2
+text = "Multiplayer"
+
+[node name="MarginContainer2" type="MarginContainer" parent="MainMenu"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 482.0
+offset_top = 280.0
+offset_right = 600.0
+offset_bottom = 320.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_constants/margin_right = 9
+
+[node name="Label" type="Label" parent="MainMenu/MarginContainer2"]
+layout_mode = 2
+text = "made by me :)"
+
+[node name="MultiplayerUI" parent="." instance=ExtResource("2_ujegd")]
+visible = false
+layout_mode = 0
+
+[connection signal="pressed" from="MainMenu/VBoxContainer/NewGameButton" to="." method="_on_new_game_button_pressed"]
+[connection signal="pressed" from="MainMenu/VBoxContainer/LoadGameButton" to="." method="_on_load_game_button_pressed"]
+[connection signal="pressed" from="MainMenu/VBoxContainer/MultiplayerButton" to="." method="_on_multiplayer_button_pressed"]
