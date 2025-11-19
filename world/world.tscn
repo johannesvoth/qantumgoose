@@ -1,27 +1,31 @@
-[gd_scene load_steps=4 format=3 uid="uid://b27by4d24t3vc"]
+[gd_scene load_steps=6 format=3 uid="uid://b27by4d24t3vc"]
 
-[ext_resource type="Texture2D" uid="uid://bw7v4v20g3ml5" path="res://icon.svg" id="1_6xmxd"]
 [ext_resource type="Script" uid="uid://b5xdbj8s87rrw" path="res://world/world.gd" id="1_tcf2h"]
+[ext_resource type="PackedScene" uid="uid://cdas100fp0ple" path="res://esc_menu/esc_menu.tscn" id="2_tcf2h"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_tcf2h"]
-properties/0/path = NodePath("Sprite2D:modulate")
-properties/0/spawn = true
-properties/0/replication_mode = 1
 
-[node name="World" type="Node2D"]
+[sub_resource type="BoxMesh" id="BoxMesh_tcf2h"]
+
+[sub_resource type="Environment" id="Environment_6xmxd"]
+
+[node name="World" type="Node3D"]
 script = ExtResource("1_tcf2h")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(512, 251)
-scale = Vector2(1.40625, 1.26562)
-texture = ExtResource("1_6xmxd")
+[node name="GameManager" type="Node" parent="."]
 
-[node name="Label" type="Label" parent="."]
-offset_left = 438.0
-offset_top = 113.0
-offset_right = 577.0
-offset_bottom = 154.0
-text = "WORLD"
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="ESCMenu" parent="UI" instance=ExtResource("2_tcf2h")]
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_tcf2h")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_tcf2h")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_6xmxd")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="WorldEnvironment"]
+transform = Transform3D(1, 0, 0, 0, 0.20791166, 0.9781476, 0, -0.9781476, 0.20791166, 0, 0, 0)

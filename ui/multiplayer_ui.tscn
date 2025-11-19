@@ -23,10 +23,10 @@ text = "LAN Area:"
 [node name="HostLAN" type="Button" parent="LANStuff"]
 layout_mode = 0
 offset_left = 28.0
-offset_top = 196.0
-offset_right = 108.0
-offset_bottom = 227.0
-text = "Host LAN"
+offset_top = 149.0
+offset_right = 197.0
+offset_bottom = 180.0
+text = "Host New via LAN"
 
 [node name="JoinLAN" type="Button" parent="LANStuff"]
 layout_mode = 0
@@ -52,33 +52,49 @@ offset_right = 205.0
 offset_bottom = 348.0
 text = "30455"
 
+[node name="Button" type="Button" parent="LANStuff"]
+layout_mode = 0
+offset_left = 26.0
+offset_top = 105.0
+offset_right = 180.0
+offset_bottom = 136.0
+text = "Host Saved via LAN"
+
 [node name="SteamStuff" type="Control" parent="."]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
+[node name="Button" type="Button" parent="SteamStuff"]
+layout_mode = 0
+offset_left = 229.0
+offset_top = 36.0
+offset_right = 463.0
+offset_bottom = 67.0
+text = "Host Saved via Steam"
+
 [node name="HostSteam" type="Button" parent="SteamStuff"]
 layout_mode = 0
-offset_left = 238.0
-offset_top = 73.0
-offset_right = 436.0
-offset_bottom = 104.0
-text = "Host Public Steam Game"
+offset_left = 227.0
+offset_top = 71.0
+offset_right = 464.0
+offset_bottom = 102.0
+text = "Host New via Steam"
 
 [node name="RefreshLobbiesButton" type="Button" parent="SteamStuff"]
 layout_mode = 0
-offset_left = 465.0
-offset_top = 74.0
-offset_right = 615.0
-offset_bottom = 105.0
+offset_left = 483.0
+offset_top = 72.0
+offset_right = 633.0
+offset_bottom = 103.0
 text = "Refresh Lobby List"
 
 [node name="Label" type="Label" parent="SteamStuff"]
 layout_mode = 0
-offset_left = 330.0
-offset_top = 21.0
-offset_right = 572.0
-offset_bottom = 44.0
+offset_left = 333.0
+offset_top = 5.0
+offset_right = 575.0
+offset_bottom = 28.0
 text = "Steam Area: (click lobby to join)"
 
 [node name="ScrollContainer" type="ScrollContainer" parent="SteamStuff"]
