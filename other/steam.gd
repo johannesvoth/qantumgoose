@@ -2,6 +2,8 @@ extends Node
 
 signal join(int)
 
+# for some reason, the expressobits package likes it to have this right here in a different file
+
 func _ready():
 	# Initialize Steam (using SpaceWar app ID 480 for testing)
 	OS.set_environment("SteamAppId", str(480))

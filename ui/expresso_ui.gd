@@ -12,8 +12,11 @@ func _ready():
 	OS.set_environment("SteamAppId", str(steam_app_id))
 	OS.set_environment("SteamGameId", str(steam_app_id))
 	
-	var initialize_response: Dictionary = Steam.steamInitEx(true, 480)
+	var initialize_response = Steam.steamInitEx(false)
+	# var initialize_response: Dictionary = Steam.steamInitEx(true, 480)
 	print("Did Steam initialize?: %s " % initialize_response)
+	
+	Steam.initRelayNetworkAccess()
 	
 	Steam.lobby_match_list.connect(_on_lobby_match_list)
 	
