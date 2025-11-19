@@ -3,9 +3,11 @@ extends Control
 var steam_app_id: int = 480 # Test game app id
 var MAX_PEERS: int = 12
 
-@onready var player_spawner: MultiplayerSpawner = $"../PlayerSpawner"
+@onready var player_spawner: MultiplayerSpawner = $"../../PlayerSpawner"
 
 func _ready():
+	self.hide()
+	
 	print("Init Steam")
 	OS.set_environment("SteamAppId", str(steam_app_id))
 	OS.set_environment("SteamGameId", str(steam_app_id))

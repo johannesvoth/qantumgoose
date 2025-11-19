@@ -32,6 +32,8 @@ func _process(delta):
 
 
 func _ready():
+	self.hide()
+	
 	#--- from steam node
 	# Initialize Steam (using SpaceWar app ID 480 for testing)
 	OS.set_environment("SteamAppId", str(480))

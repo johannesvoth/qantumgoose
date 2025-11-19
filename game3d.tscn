@@ -7,6 +7,7 @@
 
 [node name="TitleScreen" parent="." instance=ExtResource("1_p5xin")]
 debug_mode = false
+use_expresso_package = true
 
 [node name="PlayerSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("uid://bbrh0u7rgtlo3")

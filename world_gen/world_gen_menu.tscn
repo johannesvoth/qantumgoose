@@ -1,0 +1,46 @@
+[gd_scene format=3 uid="uid://bidmgyjvdxlqe"]
+
+[node name="WorldGenMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+text = "WORLD GEN MENU"
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 0
+offset_left = 534.0
+offset_top = 306.0
+offset_right = 613.0
+offset_bottom = 337.0
+text = "Continue"
+
+[node name="Button2" type="Button" parent="."]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 314.0
+offset_right = 83.0
+offset_bottom = 345.0
+text = "Go Back"
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 416.0
+offset_top = 95.0
+offset_right = 456.0
+offset_bottom = 135.0
+
+[node name="LandmassPreview" type="Label" parent="."]
+layout_mode = 0
+offset_left = 435.0
+offset_top = 31.0
+offset_right = 584.0
+offset_bottom = 54.0
+text = "Landmass Preview:"

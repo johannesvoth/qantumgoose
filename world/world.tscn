@@ -1,7 +1,10 @@
-[gd_scene load_steps=6 format=3 uid="uid://b27by4d24t3vc"]
+[gd_scene load_steps=7 format=3 uid="uid://b27by4d24t3vc"]
 
 [ext_resource type="Script" uid="uid://b5xdbj8s87rrw" path="res://world/world.gd" id="1_tcf2h"]
 [ext_resource type="PackedScene" uid="uid://cdas100fp0ple" path="res://esc_menu/esc_menu.tscn" id="2_tcf2h"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_tcf2h"]
+size = Vector2(10, 10)
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_tcf2h"]
 
@@ -12,14 +15,18 @@
 [node name="World" type="Node3D"]
 script = ExtResource("1_tcf2h")
 
+[node name="Ground" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+mesh = SubResource("PlaneMesh_tcf2h")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_tcf2h")
+
 [node name="GameManager" type="Node" parent="."]
 
 [node name="UI" type="CanvasLayer" parent="."]
 
 [node name="ESCMenu" parent="UI" instance=ExtResource("2_tcf2h")]
-
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
-replication_config = SubResource("SceneReplicationConfig_tcf2h")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_tcf2h")

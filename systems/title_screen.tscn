@@ -1,7 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://dudiorgltgrx6"]
+[gd_scene load_steps=2 format=3 uid="uid://dudiorgltgrx6"]
 
 [ext_resource type="Script" uid="uid://c8ehe2f6r8uyb" path="res://systems/title_screen.gd" id="1_xacxm"]
-[ext_resource type="PackedScene" uid="uid://75efyn1wxwpt" path="res://ui/multiplayer_ui.tscn" id="2_ujegd"]
 
 [node name="TitleScreen" type="Control"]
 layout_mode = 3
@@ -70,10 +69,6 @@ theme_override_constants/margin_right = 9
 [node name="Label" type="Label" parent="MainMenu/MarginContainer2"]
 layout_mode = 2
 text = "made by me :)"
-
-[node name="MultiplayerUI" parent="." instance=ExtResource("2_ujegd")]
-visible = false
-layout_mode = 0
 
 [connection signal="pressed" from="MainMenu/VBoxContainer/NewGameButton" to="." method="_on_new_game_button_pressed"]
 [connection signal="pressed" from="MainMenu/VBoxContainer/LoadGameButton" to="." method="_on_load_game_button_pressed"]
