@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://cdas100fp0ple" path="res://esc_menu/esc_menu.tscn" id="2_tcf2h"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_tcf2h"]
-size = Vector2(10, 10)
+size = Vector2(20, 10)
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_tcf2h"]
 
@@ -28,11 +28,12 @@ replication_config = SubResource("SceneReplicationConfig_tcf2h")
 
 [node name="ESCMenu" parent="UI" instance=ExtResource("2_tcf2h")]
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." groups=["snap"]]
 mesh = SubResource("BoxMesh_tcf2h")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_6xmxd")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="WorldEnvironment"]
-transform = Transform3D(1, 0, 0, 0, 0.20791166, 0.9781476, 0, -0.9781476, 0.20791166, 0, 0, 0)
+transform = Transform3D(0.6946584, 0.6571496, -0.29258183, 0, 0.4067366, 0.9135455, 0.7193398, -0.63460207, 0.282543, 0, 0, 0)
+shadow_enabled = true

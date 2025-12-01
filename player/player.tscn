@@ -1,6 +1,13 @@
-[gd_scene load_steps=5 format=3 uid="uid://bbrh0u7rgtlo3"]
+[gd_scene load_steps=16 format=3 uid="uid://bbrh0u7rgtlo3"]
 
 [ext_resource type="Script" uid="uid://dd43nyxjr0nrh" path="res://player/player.gd" id="1_rkbax"]
+[ext_resource type="Script" uid="uid://c56y1e2s4gsrk" path="res://display.gd" id="3_g1dw6"]
+[ext_resource type="Script" uid="uid://csjccrhj5wnx7" path="res://addons/phantom_camera/scripts/phantom_camera/phantom_camera_3d.gd" id="4_g6k8r"]
+[ext_resource type="Script" uid="uid://8umksf8e80fw" path="res://addons/phantom_camera/scripts/resources/tween_resource.gd" id="5_boad6"]
+[ext_resource type="Script" uid="uid://ul1em30xa4l6" path="res://player/texel_snapper.gd" id="5_qjkh3"]
+[ext_resource type="Script" uid="uid://bd046eokvcnu2" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="6_g6k8r"]
+[ext_resource type="Script" uid="uid://b8hhnqsugykly" path="res://addons/phantom_camera/scripts/resources/camera_3d_resource.gd" id="6_rgyib"]
+[ext_resource type="Shader" uid="uid://bnfpvf0k2mv8p" path="res://player/pixelart_upscale.gdshader" id="7_boad6"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_g1dw6"]
 properties/0/path = NodePath(".:position")
@@ -11,9 +18,26 @@ properties/0/replication_mode = 1
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_yw30f"]
 
-[node name="Player" type="CharacterBody3D"]
+[sub_resource type="Resource" id="Resource_rgyib"]
+script = ExtResource("5_boad6")
+duration = 0.5
+
+[sub_resource type="Resource" id="Resource_hg6s5"]
+script = ExtResource("6_rgyib")
+projection = 1
+size = 10.0
+far = 100.0
+metadata/_custom_type_script = "uid://b8hhnqsugykly"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_rgyib"]
+shader = ExtResource("7_boad6")
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_yw30f"]
+viewport_path = NodePath("SubViewport")
+
+[node name="Player" type="CharacterBody3D" groups=["snap"]]
 script = ExtResource("1_rkbax")
-SPEED = 3
+SPEED = 5
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_g1dw6")
@@ -22,7 +46,57 @@ replication_config = SubResource("SceneReplicationConfig_g1dw6")
 shape = SubResource("CapsuleShape3D_g1dw6")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0)
 mesh = SubResource("CapsuleMesh_yw30f")
 
-[node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.8571673, 0.5150381, 0, -0.5150381, 0.8571673, 0, 5, 5)
+[node name="SubViewport" type="SubViewport" parent="."]
+handle_input_locally = false
+size = Vector2i(482, 272)
+render_target_update_mode = 4
+
+[node name="Camera3D" type="Camera3D" parent="SubViewport"]
+physics_interpolation_mode = 1
+transform = Transform3D(0.70710677, -0.35355338, 0.6123724, 0, 0.8660254, 0.5, -0.70710677, -0.35355338, 0.6123724, 12.247448, 10.58, 12.247448)
+projection = 1
+current = true
+size = 10.0
+far = 100.0
+
+[node name="PhantomCameraHost" type="Node" parent="SubViewport/Camera3D"]
+process_priority = 300
+process_physics_priority = 300
+script = ExtResource("6_g6k8r")
+metadata/_custom_type_script = "uid://bd046eokvcnu2"
+
+[node name="TexelSnapper" type="Node" parent="SubViewport/Camera3D"]
+script = ExtResource("5_qjkh3")
+
+[node name="PhantomCamera3D" type="Node3D" parent="SubViewport" node_paths=PackedStringArray("follow_target")]
+transform = Transform3D(0.70710677, -0.35355338, 0.6123724, 0, 0.8660254, 0.5, -0.70710677, -0.35355338, 0.6123724, 12.247448, 10.58, 12.247448)
+top_level = true
+script = ExtResource("4_g6k8r")
+follow_mode = 5
+follow_target = NodePath("../..")
+tween_resource = SubResource("Resource_rgyib")
+tween_on_load = false
+camera_3d_resource = SubResource("Resource_hg6s5")
+follow_offset = Vector3(0, 0.58, 0)
+follow_damping = true
+follow_damping_value = Vector3(0.5, 0.5, 0.5)
+follow_distance = 20.0
+spring_length = 20.0
+metadata/_custom_type_script = "uid://csjccrhj5wnx7"
+
+[node name="Display" type="Control" parent="." node_paths=PackedStringArray("viewport")]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("3_g1dw6")
+viewport = NodePath("../SubViewport")
+
+[node name="Sprite2D" type="Sprite2D" parent="Display"]
+texture_filter = 2
+material = SubResource("ShaderMaterial_rgyib")
+texture = SubResource("ViewportTexture_yw30f")
+centered = false

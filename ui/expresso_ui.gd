@@ -1,6 +1,7 @@
 extends Control
 
-var steam_app_id: int = 1942280 # Test game app id
+var steam_app_id: int = 2709570 # Test game app id # supermarket together
+# more empty, brotato: 1942280
 var MAX_PEERS: int = 12
 
 @onready var player_spawner: MultiplayerSpawner = $"../../PlayerSpawner"

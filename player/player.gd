@@ -5,6 +5,9 @@ extends CharacterBody3D
 var movement_intent := Vector2.ZERO # aka direction
 var jump_intent := false
 
+
+
+
 #@export var bucket: PackedScene
 
 # @onready var util_spawner: MultiplayerSpawner = $UtilSpawnerClientAuth
@@ -15,12 +18,13 @@ var jump_intent := false
 	#b.set_multiplayer_authority(auth)
 	#return b
 
-@onready var camera_3d: Camera3D = $Camera3D
+# @onready var camera_3d: Camera3DTexelSnapped = $CameraRig/Camera3D
 
 func _ready() -> void:
 	#util_spawner.spawn_function = spawnProjectile
 	if not is_multiplayer_authority():
-		camera_3d.queue_free()
+		#camera_3d.queue_free()
+		pass
 
 func _enter_tree() -> void:
 	set_multiplayer_authority(int(str(name)))
@@ -39,6 +43,7 @@ func _unhandled_key_input(event: InputEvent) -> void: # important not to pick ju
 	
 
 var direction := Vector3.ZERO
+
 func _physics_process(delta):
 	if !is_multiplayer_authority():
 		return 
