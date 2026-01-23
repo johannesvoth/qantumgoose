@@ -5,6 +5,7 @@ extends CharacterBody3D
 var movement_intent := Vector2.ZERO # aka direction
 var jump_intent := false
 
+@onready var click_handler: Node3D = $ClickHandler
 
 
 
@@ -29,6 +30,20 @@ func _ready() -> void:
 func _enter_tree() -> void:
 	set_multiplayer_authority(int(str(name)))
 
+const FIREBALL = preload("uid://luw312ypycrf")
+@onready var stun_timer: Timer = $StunTimer
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("LMB"):
+		print("FIREBALL!")
+		
+		var cursor_pos: Vector3 = click_handler.get_cursor_world_position()
+		var fireball_instance = FIREBALL.instantiate()
+		get_parent().add_child(fireball_instance)
+		fireball_instance.global_position = Vector3(0,1,0) + self.global_position
+		fireball_instance._direction = (cursor_pos - global_position).normalized()
+		stunned = true
+		stun_timer.start(.5)
 
 func _unhandled_key_input(event: InputEvent) -> void: # important not to pick just _input since this catches typing in chat for example.
 	# Check if the "open_inventory" action was just pressed
@@ -43,6 +58,8 @@ func _unhandled_key_input(event: InputEvent) -> void: # important not to pick ju
 	
 
 var direction := Vector3.ZERO
+
+var stunned: bool = false
 
 func _physics_process(delta):
 	if !is_multiplayer_authority():
@@ -60,7 +77,9 @@ func _physics_process(delta):
 		# Apply friction/drag so the character stops
 		velocity.x = move_toward(velocity.x, 0, SPEED)
 		velocity.z = move_toward(velocity.z, 0, SPEED)
-	move_and_slide()
+	
+	if not stunned:
+		move_and_slide()
 	
 	if jump_intent:
 		do_jump.rpc()
@@ -83,3 +102,7 @@ func spawnCube():
 	cube.set_multiplayer_authority(auth)
 	get_node("../../WorldSlot/World").add_child(cube, true)
 	cube.global_position = self.global_position
+
+
+func _on_stun_timer_timeout() -> void:
+	stunned = false

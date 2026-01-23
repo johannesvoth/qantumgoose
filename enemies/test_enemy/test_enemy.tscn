@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=3 uid="uid://d1721vsxub6sr"]
+
+[ext_resource type="Script" uid="uid://vsa7gdsoh8q0" path="res://enemies/test_enemy/test_enemy.gd" id="1_qqba3"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_qqba3"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_k8lq3"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_qqba3"]
+radius = 2.79
+
+[node name="TestEnemy" type="CharacterBody3D" groups=["snap"]]
+script = ExtResource("1_qqba3")
+move_speed = 2.0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_qqba3")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_k8lq3")
+
+[node name="DetectionRange" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="DetectionRange"]
+shape = SubResource("CylinderShape3D_qqba3")
+
+[node name="WanderTimer" type="Timer" parent="."]

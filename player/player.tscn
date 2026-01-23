@@ -1,6 +1,7 @@
-[gd_scene load_steps=16 format=3 uid="uid://bbrh0u7rgtlo3"]
+[gd_scene load_steps=18 format=3 uid="uid://bbrh0u7rgtlo3"]
 
 [ext_resource type="Script" uid="uid://dd43nyxjr0nrh" path="res://player/player.gd" id="1_rkbax"]
+[ext_resource type="Script" uid="uid://d3cfe8oohpj2y" path="res://player/click_handler.gd" id="2_hg6s5"]
 [ext_resource type="Script" uid="uid://c56y1e2s4gsrk" path="res://display.gd" id="3_g1dw6"]
 [ext_resource type="Script" uid="uid://csjccrhj5wnx7" path="res://addons/phantom_camera/scripts/phantom_camera/phantom_camera_3d.gd" id="4_g6k8r"]
 [ext_resource type="Script" uid="uid://8umksf8e80fw" path="res://addons/phantom_camera/scripts/resources/tween_resource.gd" id="5_boad6"]
@@ -17,6 +18,8 @@ properties/0/replication_mode = 1
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_g1dw6"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_yw30f"]
+
+[sub_resource type="PrismMesh" id="PrismMesh_hg6s5"]
 
 [sub_resource type="Resource" id="Resource_rgyib"]
 script = ExtResource("5_boad6")
@@ -39,6 +42,14 @@ viewport_path = NodePath("SubViewport")
 script = ExtResource("1_rkbax")
 SPEED = 5
 
+[node name="StunTimer" type="Timer" parent="."]
+
+[node name="ClickHandler" type="Node3D" parent="." node_paths=PackedStringArray("viewport_sprite", "camera")]
+script = ExtResource("2_hg6s5")
+viewport_sprite = NodePath("../Display/Sprite2D")
+camera = NodePath("../SubViewport/Camera3D")
+click_plane_y = -0.5
+
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_g1dw6")
 
@@ -49,6 +60,11 @@ shape = SubResource("CapsuleShape3D_g1dw6")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0)
 mesh = SubResource("CapsuleMesh_yw30f")
 
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="MeshInstance3D"]
+transform = Transform3D(0.6, 0, 0, 0, -2.6226834e-08, 0.6, 0, -0.6, -2.6226834e-08, 0, 0.38214502, -0.6323314)
+mesh = SubResource("PrismMesh_hg6s5")
+skeleton = NodePath("../..")
+
 [node name="SubViewport" type="SubViewport" parent="."]
 handle_input_locally = false
 size = Vector2i(482, 272)
@@ -56,7 +72,7 @@ render_target_update_mode = 4
 
 [node name="Camera3D" type="Camera3D" parent="SubViewport"]
 physics_interpolation_mode = 1
-transform = Transform3D(0.70710677, -0.35355338, 0.6123724, 0, 0.8660254, 0.5, -0.70710677, -0.35355338, 0.6123724, 12.247448, 10.58, 12.247448)
+transform = Transform3D(0.70710665, -0.35355338, 0.6123722, 0, 0.8660254, 0.49999985, -0.70710665, -0.35355338, 0.6123722, 12.247444, 10.579997, 12.247444)
 projection = 1
 current = true
 size = 10.0
@@ -70,9 +86,10 @@ metadata/_custom_type_script = "uid://bd046eokvcnu2"
 
 [node name="TexelSnapper" type="Node" parent="SubViewport/Camera3D"]
 script = ExtResource("5_qjkh3")
+snap_objects = false
 
 [node name="PhantomCamera3D" type="Node3D" parent="SubViewport" node_paths=PackedStringArray("follow_target")]
-transform = Transform3D(0.70710677, -0.35355338, 0.6123724, 0, 0.8660254, 0.5, -0.70710677, -0.35355338, 0.6123724, 12.247448, 10.58, 12.247448)
+transform = Transform3D(0.70710665, -0.35355338, 0.6123722, 0, 0.8660254, 0.49999985, -0.70710665, -0.35355338, 0.6123722, 12.247444, 10.579997, 12.247444)
 top_level = true
 script = ExtResource("4_g6k8r")
 follow_mode = 5
@@ -81,7 +98,6 @@ tween_resource = SubResource("Resource_rgyib")
 tween_on_load = false
 camera_3d_resource = SubResource("Resource_hg6s5")
 follow_offset = Vector3(0, 0.58, 0)
-follow_damping = true
 follow_damping_value = Vector3(0.5, 0.5, 0.5)
 follow_distance = 20.0
 spring_length = 20.0
@@ -100,3 +116,5 @@ texture_filter = 2
 material = SubResource("ShaderMaterial_rgyib")
 texture = SubResource("ViewportTexture_yw30f")
 centered = false
+
+[connection signal="timeout" from="StunTimer" to="." method="_on_stun_timer_timeout"]

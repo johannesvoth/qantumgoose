@@ -31,7 +31,7 @@ func _process(_delta: float) -> void:
 		_snap_space = _cam.global_transform
 	_texel_size = _cam.size / float((get_viewport() as SubViewport).size.y)
 	
-	print(_texel_size)
+	# print(_texel_size)
 	# camera position in snap space
 	var snap_space_position := _cam.global_position * _snap_space
 	# snap!
